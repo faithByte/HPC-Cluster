@@ -8,24 +8,24 @@
 - name: Download Kubernetes
   hosts: all
   roles:
+    - etc-hosts # remove this after dns setup
     - firewall
     - docker
     - kubernetes
 
 - name: Setup Cluster
-  hosts: master
+  hosts: masters
   roles:
     - nfs-server
     - cluster
     - manapy
 
 - name: Join nodes
+  hosts: all
+  roles:
+    - add-node
+  
+- name: NFS client
   hosts: nodes
   roles:
-    - nodes
     - nfs-client
-
-- name: Label nodes 
-  hosts: master
-  roles:
-    - labels

@@ -1,2 +1,2 @@
 ---
-# vars file for setup
+INTERNAL_NETWORK: 192.168.56.0/24

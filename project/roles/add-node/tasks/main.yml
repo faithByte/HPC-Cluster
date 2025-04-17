@@ -1,0 +1,34 @@
+---
+- name: Get command to join the cluster
+  ansible.builtin.shell: 
+    cmd: kubeadm token create --print-join-command
+  register: join
+  delegate_to: "{{ groups['masters'] | first }}"
+  run_once: yes
+  when: inventory_hostname in groups['masters']
+
+- name: Set command to join the cluster
+  ansible.builtin.set_fact:
+    join_cluster: "{{ join.stdout }}"
+  delegate_to: "{{ groups['masters'] | first }}"
+  run_once: yes
+  when: inventory_hostname in groups['masters']
+
+- name: Join cluster
+  ansible.builtin.shell:
+    "{{ hostvars[groups['masters'] | first].join_cluster }}"
+  when: inventory_hostname not in groups['masters']
+
+- name: Label visualizers nodes
+  ansible.builtin.shell:
+    cmd: kubectl label node {{ item }} type=visualizer
+  loop: "{{ groups['visualizers'] }}"
+  run_once: true
+  when: inventory_hostname in groups['masters']
+
+- name: Label workers nodes
+  ansible.builtin.shell:
+    cmd: kubectl label node {{ item }} type=worker
+  loop: "{{ groups['workers'] }}"
+  run_once: true
+  when: inventory_hostname in groups['masters']
