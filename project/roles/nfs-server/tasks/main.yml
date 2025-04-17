@@ -1,14 +1,4 @@
 ---
-- name: Set the firewall to allow NFS traffic
-  community.general.ufw:
-    rule: allow
-    port: nfs
-    src: "{{ INTERNAL_NETWORK }}"
-
-- name: Reload UFW
-  community.general.ufw:
-    state: reloaded
-
 - name: Install dependencies
   ansible.builtin.apt:
     pkg: nfs-kernel-server

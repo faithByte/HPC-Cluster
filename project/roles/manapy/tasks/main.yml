@@ -4,11 +4,11 @@
     kubectl apply -f {{ playbook_dir }}/roles/manapy/files/nfs-volume.yaml
     kubectl apply -f {{ playbook_dir }}/roles/manapy/files/nfs-claim.yaml
 
-- name: Setup paraviewweb visualizer
-  ansible.builtin.shell: |
-    kubectl apply -f {{ playbook_dir }}/roles/manapy/files/paraview.yaml
-    kubectl apply -f {{ playbook_dir }}/roles/manapy/files/service.yaml
+# - name: Setup paraviewweb visualizer
+#   ansible.builtin.shell: |
+#     kubectl apply -f {{ playbook_dir }}/roles/manapy/files/paraview.yaml
+#     kubectl apply -f {{ playbook_dir }}/roles/manapy/files/service.yaml
 
-- name: Setup manapy
-  ansible.builtin.shell:
-    kubectl apply -f {{ playbook_dir }}/roles/manapy/files/manapy.yaml
+# - name: Setup manapy
+#   ansible.builtin.shell:
+#     kubectl apply -f {{ playbook_dir }}/roles/manapy/files/manapy.yaml

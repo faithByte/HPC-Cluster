@@ -8,13 +8,49 @@
   community.general.ufw:
     policy: deny
 
-- name: Configure to accept ssh
+- name: All nodes firewall
   community.general.ufw:
     rule: allow
-    port: ssh
-    proto: tcp
+    port: "{{ item.port }}"
+    proto: "{{ item.protocol }}"
   with_items:
-    - ssh
+    - { port: 'ssh', protocol: 'tcp' }
+    - { port: '6783', protocol: 'tcp' }
+    - { port: '6783', protocol: 'udp' }
+    - { port: '6784', protocol: 'udp' }
+    - { port: '10250', protocol: 'tcp' }
+
+- name: Masters firewall [proto]
+  community.general.ufw:
+    rule: allow
+    port: "{{ item.port }}"
+    proto: "{{ item.protocol }}"
+  with_items:
+    - { port: '6443', protocol: 'tcp' }
+    - { port: '2379', protocol: 'tcp' }
+    - { port: '2380', protocol: 'tcp' }
+    - { port: '10251', protocol: 'tcp' }
+    - { port: '10252', protocol: 'tcp' }
+    - { port: '10255', protocol: 'tcp' }
+  when: inventory_hostname in groups['masters']
+
+- name: Masters firewall [net source]
+  community.general.ufw:
+    rule: allow
+    port: "{{ item.port }}"
+    src: "{{ item.source }}"
+  with_items:
+    - { port: 'nfs', source: "{{ INTERNAL_NETWORK }}" }
+  when: inventory_hostname in groups['masters']
+
+- name: Nodes firewall
+  community.general.ufw:
+    rule: allow
+    port: "{{ item.port }}"
+    proto: "{{ item.protocol }}"
+  with_items:
+    - { port: '30000:32767', protocol: 'tcp' }
+  when: inventory_hostname not in groups['masters']
 
 - name: Enable UFW
   community.general.ufw:
