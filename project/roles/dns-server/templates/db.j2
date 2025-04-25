@@ -10,6 +10,5 @@ $TTL	604800
 			 604800 )	; Negative Cache TTL
 ;
 
-@       IN	NS	{{ inventory_hostname }}.{{ DOMAIN }}.
+@		IN	NS	{{ inventory_hostname }}.{{ DOMAIN }}.
 @		IN	PTR	{{ DOMAIN }}.
-{{ inventory_hostname }}		IN	A	{{ ansible_host }}

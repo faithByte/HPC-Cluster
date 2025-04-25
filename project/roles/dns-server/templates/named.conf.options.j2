@@ -1,14 +1,15 @@
-acl "trusted" {
+acl "acl" {
     {{ INTERNAL_NETWORK }};
     localhost;
-    localnets;
 };
 
 options {
     directory "/var/cache/bind";
+    version "SECRET";
 
     recursion yes;
-    allow-query { trusted; };
+    allow-query { acl; };
+    allow-transfer { none; };
 
     forwarders {
         8.8.8.8;

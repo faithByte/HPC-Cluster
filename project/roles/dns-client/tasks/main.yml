@@ -1,4 +1,12 @@
 ---
+- name: DNS firewall
+  community.general.ufw:
+    rule: allow
+    port: 53
+    src: "{{ INTERNAL_NETWORK }}"
+  when: inventory_hostname in groups['dns_servers']
+  ignore_errors: yes
+
 - name: Install resolvconf
   ansible.builtin.apt:
     pkg: resolvconf
@@ -24,4 +32,10 @@
     line: "{{ item }}\t\tIN\tA\t{{ hostvars[item].ansible_host }}"
     state: present
   loop: "{{ ansible_play_hosts }}"
+  when: inventory_hostname in groups['dns_servers']
+
+- name: Reload dns server  
+  ansible.builtin.systemd:
+    name: named
+    state: reloaded
   when: inventory_hostname in groups['dns_servers']
