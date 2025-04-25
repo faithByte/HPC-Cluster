@@ -1,0 +1,15 @@
+;
+; BIND data file for local loopback interface
+;
+$TTL	604800
+@	IN	SOA	{{ inventory_hostname }}.{{ DOMAIN }}. root.{{ DOMAIN }}. (
+			      2		; Serial
+			 604800		; Refresh
+			  86400		; Retry
+			2419200		; Expire
+			 604800 )	; Negative Cache TTL
+;
+
+@       IN	NS	{{ inventory_hostname }}.{{ DOMAIN }}.
+@		IN	PTR	{{ DOMAIN }}.
+{{ inventory_hostname }}		IN	A	{{ ansible_host }}

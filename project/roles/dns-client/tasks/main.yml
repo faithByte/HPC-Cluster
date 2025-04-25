@@ -1,0 +1,27 @@
+---
+- name: Install resolvconf
+  ansible.builtin.apt:
+    pkg: resolvconf
+    state: present
+
+- name: Add our DNS server
+  ansible.builtin.lineinfile:
+    path: /etc/network/interfaces
+    regexp: '^iface eth0.*'
+    line: '\g<0>\ndns-nameserver {{ hostvars["dns"].ansible_host }}\n'
+    backrefs: yes
+    state: present
+
+- name: Restart your networking interface
+  ansible.builtin.shell: |
+    ifdown --force {{ INTERNAL_INTERFACE }} 
+    ip addr flush dev {{ INTERNAL_INTERFACE }} 
+    ifup --force {{ INTERNAL_INTERFACE }}
+
+- name: Add client to DNS server
+  ansible.builtin.lineinfile:
+    path: "/etc/bind/zones/db.{{ DOMAIN }}"
+    line: "{{ item }}\t\tIN\tA\t{{ hostvars[item].ansible_host }}"
+    state: present
+  loop: "{{ ansible_play_hosts }}"
+  when: inventory_hostname in groups['dns_servers']
