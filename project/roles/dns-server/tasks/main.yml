@@ -1,31 +1,36 @@
 ---
-# - name: Install bind
-#   ansible.builtin.apt:
-#     pkg: 
-#       - bind9
-#       - dnsutils
-#       - ufw
-#     state: present
+- name: DNS firewall
+  community.general.ufw:
+    rule: allow
+    port: 53
+    src: "{{ INTERNAL_NETWORK }}/{{ SHORT_MASK }}"
+  
+- name: Install bind
+  ansible.builtin.apt:
+    pkg: 
+      - bind9
+      - dnsutils
+    state: present
 
-# - name: Create zones folder
-#   ansible.builtin.file:
-#     path: /etc/bind/zones
-#     state: directory
+- name: Create zones folder
+  ansible.builtin.file:
+    path: /etc/bind/zones
+    state: directory
 
-# - name: Specify allowed clients
-#   ansible.builtin.template:
-#     src: named.conf.options.j2
-#     dest: /etc/bind/named.conf.options
+- name: Specify allowed clients
+  ansible.builtin.template:
+    src: named.conf.options.j2
+    dest: /etc/bind/named.conf.options
 
-# - name: Zone definition
-#   ansible.builtin.template:
-#     src: named.conf.local.j2
-#     dest: /etc/bind/named.conf.local
+- name: Zone definition
+  ansible.builtin.template:
+    src: named.conf.local.j2
+    dest: /etc/bind/named.conf.local
 
-# - name: Configure the forward lookup zone
-#   ansible.builtin.template:
-#     src: db.j2
-#     dest: "/etc/bind/zones/db.{{ DOMAIN }}"
+- name: Configure the forward lookup zone
+  ansible.builtin.template:
+    src: db.j2
+    dest: "/etc/bind/zones/db.{{ DOMAIN }}"
 
 - name: Enable & start dns server  
   ansible.builtin.systemd:
