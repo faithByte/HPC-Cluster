@@ -13,7 +13,7 @@
     rule: allow
     port: ssh
     proto: tcp
-    src: "{{ INTERNAL_NETWORK }}/{{ MASK }}"
+    # src: "{{ INTERNAL_NETWORK }}/{{ MASK }}"
 
 - name: Enable UFW
   community.general.ufw:
