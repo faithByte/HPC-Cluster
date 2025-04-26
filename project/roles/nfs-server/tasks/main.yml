@@ -1,4 +1,11 @@
 ---
+- name: NFS firewall
+  community.general.ufw:
+    rule: allow
+    port: nfs
+    src: "{{ INTERNAL_NETWORK }}/{{ MASK }}"
+  ignore_errors: yes
+
 - name: Install dependencies
   ansible.builtin.apt:
     pkg: nfs-kernel-server
@@ -14,7 +21,7 @@
 - name: Add network to nfs file
   ansible.builtin.lineinfile:
     path: /etc/exports
-    line: "/mnt/shared {{ INTERNAL_NETWORK }}(rw,sync,no_subtree_check)"
+    line: "/mnt/shared {{ INTERNAL_NETWORK }}/{{ MASK }}(rw,sync,no_subtree_check)"
     state: present
     create: yes
 
