@@ -3,8 +3,9 @@
   community.general.ufw:
     rule: allow
     port: 53
-    src: "{{ INTERNAL_NETWORK }}/{{ SHORT_MASK }}"
-  
+    src: "{{ INTERNAL_NETWORK }}/{{ MASK }}"
+  ignore_errors: yes
+
 - name: Install bind
   ansible.builtin.apt:
     pkg: 

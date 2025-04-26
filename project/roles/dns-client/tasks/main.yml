@@ -3,7 +3,7 @@
   community.general.ufw:
     rule: allow
     port: 53
-    src: "{{ INTERNAL_NETWORK }}"
+    src: "{{ INTERNAL_NETWORK }}/{{ MASK }}"
   when: inventory_hostname in groups['dns_servers']
   ignore_errors: yes
 
@@ -12,7 +12,16 @@
     pkg: resolvconf
     state: present
 
-- name: Add our DNS server
+# temp
+- name: Add DNS server
+  ansible.builtin.lineinfile:
+    path: /etc/resolv.conf
+    line: nameserver {{ hostvars['dns'].ansible_host }}
+    insertbefore: BOF
+    state: present
+  
+# permanent
+- name: Add DNS server
   ansible.builtin.lineinfile:
     path: /etc/network/interfaces
     regexp: '^iface eth0.*'
@@ -20,11 +29,11 @@
     backrefs: yes
     state: present
 
-- name: Restart your networking interface
-  ansible.builtin.shell: |
-    ifdown --force {{ INTERNAL_INTERFACE }} 
-    ip addr flush dev {{ INTERNAL_INTERFACE }} 
-    ifup --force {{ INTERNAL_INTERFACE }}
+# - name: Restart your networking interface
+#   ansible.builtin.shell: |
+#     ifdown --force {{ internal_interface }} 
+#     ip addr flush dev {{ internal_interface }} 
+#     ifup --force {{ internal_interface }}
 
 - name: Add client to DNS server
   ansible.builtin.lineinfile:

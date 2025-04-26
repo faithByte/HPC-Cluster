@@ -34,15 +34,6 @@
     - { port: '10255', protocol: 'tcp' }
   when: inventory_hostname in groups['masters']
 
-- name: Masters firewall [net source]
-  community.general.ufw:
-    rule: allow
-    port: "{{ item.port }}"
-    src: "{{ item.source }}"
-  with_items:
-    - { port: 'nfs', source: "{{ INTERNAL_NETWORK }}" }
-  when: inventory_hostname in groups['masters']
-
 - name: Nodes firewall
   community.general.ufw:
     rule: allow
