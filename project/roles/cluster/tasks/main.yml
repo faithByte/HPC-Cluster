@@ -1,4 +1,22 @@
 ---
+- name: Master firewall [kube]
+  community.general.ufw:
+    rule: allow
+    port: "{{ item.port }}"
+    proto: "{{ item.protocol }}"
+  with_items:
+    - { port: '6783', protocol: 'tcp' }
+    - { port: '6783', protocol: 'udp' }
+    - { port: '6784', protocol: 'udp' }
+    - { port: '10250', protocol: 'tcp' }
+    - { port: '6443', protocol: 'tcp' }
+    - { port: '2379', protocol: 'tcp' }
+    - { port: '2380', protocol: 'tcp' }
+    - { port: '10251', protocol: 'tcp' }
+    - { port: '10252', protocol: 'tcp' }
+    - { port: '10255', protocol: 'tcp' }
+  ignore_errors: yes
+
 - name: Init cluster
   ansible.builtin.shell:
     cmd: kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address={{ ansible_host }}

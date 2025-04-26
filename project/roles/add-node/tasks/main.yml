@@ -1,4 +1,17 @@
 ---
+- name: Node firewall [kube]
+  community.general.ufw:
+    rule: allow
+    port: "{{ item.port }}"
+    proto: "{{ item.protocol }}"
+  with_items:
+    - { port: '6783', protocol: 'tcp' }
+    - { port: '6783', protocol: 'udp' }
+    - { port: '6784', protocol: 'udp' }
+    - { port: '10250', protocol: 'tcp' }
+    # - { port: '30000:32767', protocol: 'tcp' }
+  ignore_errors: yes
+
 - name: Get command to join the cluster
   ansible.builtin.shell: 
     cmd: kubeadm token create --print-join-command
