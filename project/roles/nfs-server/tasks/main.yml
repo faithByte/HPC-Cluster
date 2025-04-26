@@ -6,6 +6,11 @@
     src: "{{ INTERNAL_NETWORK }}/{{ MASK }}"
   ignore_errors: yes
 
+- name: Firewall reload
+  community.general.ufw:
+    state: reloaded
+  ignore_errors: yes
+
 - name: Install dependencies
   ansible.builtin.apt:
     pkg: nfs-kernel-server
@@ -13,7 +18,7 @@
 
 - name: Create shared folder
   ansible.builtin.file:
-    path: /mnt/shared
+    path: "{{ shared_folder }}"
     state: directory
     owner: nobody
     group: nogroup
@@ -21,7 +26,7 @@
 - name: Add network to nfs file
   ansible.builtin.lineinfile:
     path: /etc/exports
-    line: "/mnt/shared {{ INTERNAL_NETWORK }}/{{ MASK }}(rw,sync,no_subtree_check)"
+    line: "{{ shared_folder }} {{ INTERNAL_NETWORK }}/{{ MASK }}(rw,sync,no_subtree_check)"
     state: present
     create: yes
 
