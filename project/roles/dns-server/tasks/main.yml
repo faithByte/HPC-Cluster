@@ -6,6 +6,11 @@
     src: "{{ INTERNAL_NETWORK }}/{{ MASK }}"
   ignore_errors: yes
 
+- name: Firewall reload
+  community.general.ufw:
+    state: reloaded
+  ignore_errors: yes
+
 - name: Install bind
   ansible.builtin.apt:
     pkg: 

@@ -1,12 +1,4 @@
 ---
-- name: DNS firewall
-  community.general.ufw:
-    rule: allow
-    port: 53
-    src: "{{ INTERNAL_NETWORK }}/{{ MASK }}"
-  when: inventory_hostname in groups['dns_servers']
-  ignore_errors: yes
-
 - name: Install resolvconf
   ansible.builtin.apt:
     pkg: resolvconf
@@ -37,14 +29,15 @@
 
 - name: Add client to DNS server
   ansible.builtin.lineinfile:
-    path: "/etc/bind/zones/db.{{ DOMAIN }}"
-    line: "{{ item }}\t\tIN\tA\t{{ hostvars[item].ansible_host }}"
+    dest: "/etc/bind/zones/db.{{ DOMAIN }}"
+    line: "{{ inventory_hostname }}\t\tIN\tA\t{{ ansible_host }}"
     state: present
-  loop: "{{ ansible_play_hosts }}"
-  when: inventory_hostname in groups['dns_servers']
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['dns_servers'] }}"
 
 - name: Reload dns server  
   ansible.builtin.systemd:
     name: named
     state: reloaded
-  when: inventory_hostname in groups['dns_servers']
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['dns_servers'] }}"
