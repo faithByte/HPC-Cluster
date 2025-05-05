@@ -28,6 +28,9 @@ check:
 run:
 	@cd ../project && ansible-playbook $(PLAYBOOK);
 
+test:
+	@cd ../project && ansible-playbook test.yml;
+
 slurm:
 	@cd ../slurm && ansible-playbook $(PLAYBOOK);
 

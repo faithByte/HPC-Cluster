@@ -1,31 +1,48 @@
+# - name: Download Kubernetes
+#   hosts: dns
+#   tasks:
+#   - name: Update
+#     ansible.builtin.debug:
+#       msg: "{{ internal_interface }}"
+
 - name: Download Kubernetes
   hosts: all
   tasks:
   - name: Update
     ansible.builtin.apt:
       update_cache: yes
+  roles:
+    - firewall
+
+- name: Download Kubernetes
+  hosts: dns_servers
+  roles:
+    - dns-server
 
 - name: Download Kubernetes
   hosts: all
   roles:
-    - firewall
+    - dns-client
+
+- name: Download Kubernetes
+  hosts: cluster
+  roles:
     - docker
     - kubernetes
 
 - name: Setup Cluster
-  hosts: master
+  hosts: masters
   roles:
     - nfs-server
     - cluster
     - manapy
 
 - name: Join nodes
+  hosts: cluster
+  roles:
+    - add-node
+
+- name: NFS client
   hosts: nodes
   roles:
-    - nodes
     - nfs-client
-
-- name: Label nodes 
-  hosts: master
-  roles:
-    - labels

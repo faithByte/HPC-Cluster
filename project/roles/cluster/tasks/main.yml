@@ -1,45 +1,21 @@
 ---
-- name: Configure firewall [TCP]
+- name: Master firewall [kube]
   community.general.ufw:
     rule: allow
-    port: "{{ item }}"
-    proto: tcp
+    port: "{{ item.port }}"
+    proto: "{{ item.protocol }}"
   with_items:
-    - 6443
-    - 2379
-    - 2380
-    - 10250
-    - 10251
-    - 10252
-    - 10255
-    - 6783
-
-- name: Configure firewall [UDP]
-  community.general.ufw:
-    rule: allow
-    port: "{{ item }}"
-    proto: udp
-  with_items:
-    - 6783
-    - 6784
-
-- name: Reload UFW
-  community.general.ufw:
-    state: reloaded
-
-- name: Delete
-  ansible.builtin.lineinfile:
-    path: /etc/hosts
-    regexp: '{{ inventory_hostname }}'
-    state: absent
-
-- name: Add master IP to hosts
-  ansible.builtin.lineinfile:
-    path: /etc/hosts
-    line: "{{ hostvars[item].ansible_host }} {{ hostvars[item].inventory_hostname }}"
-    state: present
-    create: yes
-  loop: "{{ groups['all'] }}"
+    - { port: '6783', protocol: 'tcp' }
+    - { port: '6783', protocol: 'udp' }
+    - { port: '6784', protocol: 'udp' }
+    - { port: '10250', protocol: 'tcp' }
+    - { port: '6443', protocol: 'tcp' }
+    - { port: '2379', protocol: 'tcp' }
+    - { port: '2380', protocol: 'tcp' }
+    - { port: '10251', protocol: 'tcp' }
+    - { port: '10252', protocol: 'tcp' }
+    - { port: '10255', protocol: 'tcp' }
+  ignore_errors: yes
 
 - name: Init cluster
   ansible.builtin.shell:
@@ -55,11 +31,8 @@
   ansible.builtin.shell:
     cmd: kubectl apply -f https://reweave.azurewebsites.net/k8s/v1.29/net.yaml
 
-- name: Get join command
-  ansible.builtin.shell: 
-    cmd: kubeadm token create --print-join-command
-  register: join
 
-- name: Set join command
-  ansible.builtin.set_fact:
-    join_cluster: "{{ join.stdout_lines[0] }}"
+
+- name: Create kubectl alias
+  ansible.builtin.shell:
+    cmd: echo "alias k=kubectl" >> /etc/profile.d/bash_completion.sh

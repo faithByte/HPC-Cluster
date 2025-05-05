@@ -8,13 +8,12 @@
   community.general.ufw:
     policy: deny
 
-- name: Configure to accept ssh
+- name: All nodes firewall
   community.general.ufw:
     rule: allow
     port: ssh
     proto: tcp
-  with_items:
-    - ssh
+    # src: "{{ INTERNAL_NETWORK }}/{{ MASK }}"
 
 - name: Enable UFW
   community.general.ufw:

@@ -11,4 +11,4 @@
 
 - name: Mount shared folder
   ansible.builtin.shell:
-    cmd: "mount {{ hostvars['master'].inventory_hostname }}:/mnt/shared /data"
+    cmd: "mount {{ hostvars['nfs'].inventory_hostname }}.{{ DOMAIN }}:{{ hostvars['nfs'].shared_folder }} /data"

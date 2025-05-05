@@ -1,0 +1,9 @@
+- name: Download Kubernetes
+  hosts: dns_servers
+  roles:
+    - dns-server
+
+- name: Download Kubernetes
+  hosts: all
+  roles:
+    - dns-client
