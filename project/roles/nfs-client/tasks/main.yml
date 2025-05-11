@@ -9,6 +9,13 @@
     path: /data
     state: directory
 
-- name: Mount shared folder
-  ansible.builtin.shell:
-    cmd: "mount {{ hostvars['nfs'].inventory_hostname }}.{{ DOMAIN }}:{{ hostvars['nfs'].shared_folder }} /data"
+- name: Specify allowed clients
+  ansible.builtin.template:
+    src: data.mount.j2
+    dest: /etc/systemd/system/data.mount
+
+- name: Enable & start autofs
+  ansible.builtin.systemd:
+    name: data.mount
+    enabled: yes
+    state: started

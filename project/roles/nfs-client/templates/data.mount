@@ -1,0 +1,12 @@
+[Unit]
+Description=data mount
+After=network-online.target
+Wants=network-online.target
+
+[Mount]
+What={{ hostvars['nfs'].inventory_hostname }}.{{ DOMAIN }}:{{ hostvars['nfs'].shared_folder }}
+Where=/data
+Type=nfs4
+Options=_netdev,nosuid,nouser
+[Install]
+WantedBy=multi-user.target

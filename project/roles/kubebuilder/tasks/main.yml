@@ -1,0 +1,45 @@
+---
+# tasks file for kubebuilder
+
+- name: Download GO 
+  ansible.builtin.get_url:
+    url: "https://go.dev/dl/go1.24.2.linux-amd64.tar.gz"
+    dest: "/tmp/go1.24.2.linux-amd64.tar.gz"
+    force: true
+
+- name: Install GO
+  ansible.builtin.shell:
+    cmd: tar -C /usr/local -xzf /tmp/go1.24.2.linux-amd64.tar.gz
+
+
+- name: GOOS
+  ansible.builtin.command:
+    cmd: /usr/local/go/bin/go env GOOS
+  register: GOOS
+
+- name: GOARCH
+  ansible.builtin.command: 
+    cmd: /usr/local/go/bin/go env GOARCH
+  register: GOARCH
+
+- name: Download kubebuilder 
+  ansible.builtin.get_url:
+    url: "https://go.kubebuilder.io/dl/latest/{{ GOOS.stdout }}/{{ GOARCH.stdout }}"
+    dest: "/usr/local/bin/kubebuilder"
+    mode: 0755
+    force: true
+
+- name: Get command kubectl path
+  ansible.builtin.command: 
+    cmd: whereis kubectl
+  register: kubectl_path
+
+- name: Create commands symbolic link
+  ansible.builtin.file:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: 0755
+    state: link
+  with_items:
+    - { src: /usr/local/go/bin/go, dest: /usr/local/bin/go }
+    - { src: "{{ kubectl_path }}", dest: /usr/local/bin/k }

@@ -23,12 +23,19 @@
     - docker
     - kubernetes
 
+# ============= DEV =======================
+- name: Download kubebuilder
+  hosts: master
+  roles:
+    - kubebuilder
+    - manapy
+# =========================================
+
 - name: Setup Cluster
   hosts: masters
   roles:
     - nfs-server
     - cluster
-    # - manapy
 
 - name: Join nodes
   hosts: cluster
