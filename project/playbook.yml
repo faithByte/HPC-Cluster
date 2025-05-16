@@ -12,30 +12,29 @@
   roles:
     - dns-server
 
+- name: Setup NFS Server
+  hosts: nfs_servers
+  roles:
+    - nfs-server
+
 - name: Setup DNS Clients
   hosts: all
   roles:
     - dns-client
 
-- name: Download Kubernetes
+- name: 
   hosts: cluster
   roles:
     - docker
     - kubernetes
+    - nfs-client
 
 - name: Setup Cluster
   hosts: masters
   roles:
-    - nfs-server
     - cluster
-    # - manapy
 
 - name: Join nodes
-  hosts: cluster
-  roles:
-    - add-node
-
-- name: Setup NFS client
   hosts: nodes
   roles:
-    - nfs-client
+    - add-node
