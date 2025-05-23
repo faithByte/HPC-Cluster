@@ -35,6 +35,6 @@
     - cluster
 
 - name: Join nodes
-  hosts: nodes
+  hosts: cluster
   roles:
     - add-node

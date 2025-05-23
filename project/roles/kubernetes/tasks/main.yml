@@ -67,6 +67,10 @@
   ansible.builtin.apt_key:
     url: https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key
     keyring: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+  retries: 5
+  delay: 3
+  register: job
+  until: job.failed == false
 
 - name: Add Kubernetes repo
   ansible.builtin.apt_repository:
