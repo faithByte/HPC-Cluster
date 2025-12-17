@@ -1,0 +1,66 @@
+---
+
+- name: Firewall Setup
+  community.general.ufw:
+    rule: allow
+    from_ip: "{{ INTERNAL_NETWORK }}"
+    to_port: http
+    proto: tcp
+  when: "'ufw' in ansible_facts.packages"
+
+- name: Install packages
+  ansible.builtin.package:
+      - apt-mirror 
+      - nginx
+  state: present
+  notify: Restart nginx
+
+- name: Ensure needed directories exists
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ apt_mirror_path }}"
+    - /var/log
+    - /var/www/html/
+
+- name: Configure apt-mirror
+  template:
+    src: mirror.list.j2
+    dest: /etc/apt/mirror.list
+    force: true
+    backup: true
+
+- name: "[TEST MODE] get apt-mirror" 
+  ansible.builtin.shell: |
+    cd /vagrant/dev
+    apt install -y unzip
+    unzip apt-mirror.zip
+
+- name: "[TEST MODE] move apt-mirror" 
+  ansible.builtin.shell: |
+    rm -rf "{{ apt_mirror_path }}"
+    mv /vagrant/dev/apt-mirror "{{ apt_mirror_path }}"
+  when: MODE == "TEST"
+
+- name: Mirror APT Packages
+  ansible.builtin.shell: apt-mirror
+  when: MODE is not defined
+
+- name: Serve the Mirror via Nginx
+  ansible.builtin.file:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    state: link
+  notify: Restart nginx
+  with_items:
+    - { src: '/var/spool/apt-mirror/mirror/deb.debian.org/debian/', dest: '/var/www/html/debian' }
+    - { src: '/var/spool/apt-mirror/mirror/security.debian.org/debian/', dest: '/var/www/html/debian-security' }
+
+- name: Automate Mirror Sync
+  ansible.builtin.cron:
+    name: "APT Mirror Sync"
+    user: apt-mirror
+    hour: "2"
+    minute: "0"
+    job: "apt-mirror > /var/log/apt-mirror.log"

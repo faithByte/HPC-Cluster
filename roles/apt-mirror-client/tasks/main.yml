@@ -1,0 +1,12 @@
+---
+
+- name: Loop over app hosts one by one
+  template:
+    src: sources.list.j2
+    dest: /etc/apt/sources.list 
+    force: true
+    backup: true
+
+- name: Update
+  ansible.builtin.apt:
+    update_cache: yes
