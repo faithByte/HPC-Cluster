@@ -1,0 +1,28 @@
+---
+
+- name: Install nginx
+  ansible.builtin.package:
+    name: nginx
+    state: present
+  changed_when: true
+  notify: 
+    - Start nginx
+    - Allow HTTP from internal network
+
+- name: Ensure needed directories exists
+  ansible.builtin.file:
+    path:  "{{ item }}"
+    state: directory
+  with_items:
+    - /var/log/nginx/
+    - /var/run/
+    - /var/log/nginx/
+
+- name: Configure nginx server
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf 
+    force: true
+    backup: true
+  notify:
+    - Reload nginx
