@@ -1,0 +1,8 @@
+.vscode/
+.vagrant/
+.files/
+*.py
+results/
+test*
+inventories*
+playbook*
