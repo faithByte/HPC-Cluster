@@ -35,7 +35,7 @@ This project is organized around **Ansible roles**, each responsible for one con
 | Feature            | RedHat        | Debian        |
 |:------------------:|:-------------:|:-------------:|
 | nginx server       | ✓             | ✓             |
-| Mirror server      |               |               |
+| Mirror server      | ✓             | ✓             |
 | Mirror client      |               |               |
 | DNS server         |               |               |
 | DNS client         |               |               |

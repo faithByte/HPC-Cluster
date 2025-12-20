@@ -1,0 +1,21 @@
+---
+
+- name: Load OS-specific variables
+  ansible.builtin.include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Disable all repos
+  ansible.builtin.shell: |
+    dnf config-manager --disable "*"
+    dnf clean all
+  when: ansible_pkg_mgr == 'dnf'
+
+- name: Repos server configuration
+  template:
+    src: "{{ ansible_os_family }}/config.j2"
+    dest: "{{ config_path }}"
+    force: true
+    backup: true
+
+- name: Update packages
+  ansible.builtin.shell:
+    cmd: "{{ ansible_pkg_mgr }} update -y"

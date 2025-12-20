@@ -1,0 +1,13 @@
+packages:
+  - apt-mirror
+  - cron
+
+repo_name: debian
+
+mirror_command: apt-mirror
+
+repo_config_dest: '/etc/apt/mirror.list'
+
+repos_links: 
+  - { src: '{{ repos_path }}/{{ repo_name }}/mirror/deb.debian.org/debian/', dest: "{{ nginx_path }}/{{ repo_name }}" }
+  - { src: '{{ repos_path }}/{{ repo_name }}/mirror/security.debian.org/debian-security/', dest: "{{ nginx_path }}/{{ repo_name }}-security" }

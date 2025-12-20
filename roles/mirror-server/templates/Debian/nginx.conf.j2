@@ -1,0 +1,18 @@
+server {
+    listen       80;
+    listen  [::]:80;
+    server_name  _;
+
+    access_log  /var/log/nginx/host.access.log  main;
+
+    autoindex on;
+    root   {{ nginx_path }};
+
+    location /debian/ {
+        index  index.html index.htm;
+    }
+
+    location /debian-security/ {
+        index  index.html index.htm;
+    }
+}

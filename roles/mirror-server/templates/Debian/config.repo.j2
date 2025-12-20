@@ -1,0 +1,24 @@
+############# config ##################
+set base_path    {{ repos_path }}/{{ repo_name }}
+set nthreads     20
+set _tilde 0
+############# end config ##############
+
+############# Repositories to Mirror ###########
+
+# Debian main repository
+deb http://deb.debian.org/debian {{ ansible_distribution_release }} main contrib non-free-firmware
+
+# Updates (important bugfixes)
+deb http://deb.debian.org/debian {{ ansible_distribution_release }}-updates main contrib non-free-firmware
+
+# Security updates (CRITICAL)
+deb http://security.debian.org/debian-security {{ ansible_distribution_release }}-security main contrib non-free-firmware
+
+
+############# Clean Instructions ##############
+
+clean http://deb.debian.org/debian
+clean http://security.debian.org/debian-security
+
+##############################################

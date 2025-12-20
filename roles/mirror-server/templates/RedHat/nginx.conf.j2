@@ -1,0 +1,14 @@
+server {
+    listen       80;
+    listen  [::]:80;
+    server_name  _;
+
+    access_log  /var/log/nginx/host.access.log  main;
+    
+    autoindex on;
+    root   {{ nginx_path }};
+    
+    location /rocky9/ {
+        index  index.html index.htm;
+    }
+}
