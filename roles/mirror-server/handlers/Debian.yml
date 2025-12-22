@@ -1,9 +1,0 @@
----
-
-- name: Firewall Setup
-  community.general.ufw:
-    rule: allow
-    from_ip: "{{ INTERNAL_NETWORK }}"
-    to_port: http
-    proto: tcp
-  when: "'ufw' in ansible_facts.packages"
