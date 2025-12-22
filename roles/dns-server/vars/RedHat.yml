@@ -1,0 +1,10 @@
+packages:
+  - bind 
+  - bind-utils
+  - bind-chroot
+
+config_dir: named
+
+conf_file: /etc/named.conf
+
+directory: /var/named

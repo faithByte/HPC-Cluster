@@ -1,0 +1,23 @@
+acl "acl" {
+    {{ INTERNAL_NETWORK }};
+    localhost;
+};
+
+options {
+    directory "{{ directory }}";
+    version "SECRET";
+
+    recursion yes;
+    allow-query { acl; };
+    allow-transfer { none; };
+
+    forwarders {
+        8.8.8.8;
+        8.8.4.4;
+    };
+
+    dnssec-validation auto;
+
+    listen-on { any; };
+    listen-on-v6 { any; };
+};

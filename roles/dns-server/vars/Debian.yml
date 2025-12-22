@@ -1,0 +1,9 @@
+packages:
+  - bind9
+  - bind9utils
+
+config_dir: bind
+
+conf_file: /etc/bind/named.conf
+
+directory: /var/cache/bind

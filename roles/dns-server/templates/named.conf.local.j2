@@ -1,0 +1,4 @@
+zone "{{ DOMAIN_NAME }}" {
+    type master;
+    file "/etc/{{ config_dir }}/zones/db.{{ DOMAIN_NAME }}";
+};

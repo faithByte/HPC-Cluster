@@ -37,8 +37,8 @@ This project is organized around **Ansible roles**, each responsible for one con
 | nginx server       | ✓             | ✓             |
 | Mirror server      | ✓             | ✓             |
 | Mirror client      | ✓             | ✓             |
-| DNS server         |               |               |
-| DNS client         |               |               |
+| DNS server         |               | ✓             |
+| DNS client         |               | ✓             |
 | NFS server         |               |               |
 | NFS client         |               |               |
 | Slurmd             |               |               |

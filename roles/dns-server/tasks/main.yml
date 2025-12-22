@@ -1,0 +1,42 @@
+---
+
+- name: Load OS-specific variables
+  ansible.builtin.include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Install bind
+  ansible.builtin.package:
+    pkg: "{{ packages }}"
+    state: present
+  changed_when: true
+  notify: "DNS Firewall Setup"
+
+- name: Create zones folder
+  ansible.builtin.file:
+    path: /etc/{{ config_dir }}/zones
+    state: directory
+
+- name: Config named
+  ansible.builtin.template:
+    src: named.conf.j2
+    dest: "{{ conf_file }}"
+  
+- name: Specify allowed clients
+  ansible.builtin.template:
+    src: named.conf.options.j2
+    dest: /etc/{{ config_dir }}/named.conf.options
+
+- name: Zone definition
+  ansible.builtin.template:
+    src: named.conf.local.j2
+    dest: /etc/{{ config_dir }}/named.conf.local
+
+- name: Configure the forward lookup zone
+  ansible.builtin.template:
+    src: db.j2
+    dest: "/etc/{{ config_dir }}/zones/db.{{ DOMAIN_NAME }}"
+
+- name: Enable & start dns server  
+  ansible.builtin.systemd:
+    name: named
+    enabled: yes
+    state: restarted
