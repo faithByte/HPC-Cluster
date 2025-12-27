@@ -1,0 +1,13 @@
+[Unit]
+Description=nfs mount
+After=network-online.target
+Wants=network-online.target
+
+[Mount]
+What={{ hostvars['nfs'].ansible_host }}:{{ item.src }}
+Where={{ item.dest }}
+Type=nfs4
+Options=_netdev,nosuid,nouser
+
+[Install]
+WantedBy=multi-user.target

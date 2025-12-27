@@ -1,0 +1,12 @@
+---
+
+- name: NFS Firewall Setup
+  ansible.posix.firewalld:
+    rich_rule: 'rule family="ipv4" source address="{{ INTERNAL_NETWORK }}" service name="nfs" accept'
+    state: enabled
+    permanent: true
+    immediate: true
+  when:
+    - ansible_facts.services is defined
+    - ansible_facts.services['firewalld.service'] is defined
+    - ansible_facts.services['firewalld.service'].state == 'running'

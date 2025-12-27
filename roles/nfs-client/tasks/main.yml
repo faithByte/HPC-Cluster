@@ -1,0 +1,44 @@
+---
+
+- name: Load OS-specific variables
+  ansible.builtin.include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Install dependencies
+  ansible.builtin.package:
+    pkg: "{{ packages }}"
+    state: present
+
+- name: Create shared folder
+  ansible.builtin.file:
+    path: "{{ item.dest }}"
+    state: directory
+  loop: "{{ mounts }}"
+
+- name: Get systemd filenames
+  shell: echo `echo {{ item.dest }} | sed 's/^\///; s/\//-/g'`.mount
+  loop: "{{ mounts }}"
+  register: filenames
+
+- name: Initialize mounts_with_files array
+  set_fact:
+    mounts_with_files: []
+
+- name: Add filenames to mounts
+  set_fact:
+    mounts_with_files: "{{ mounts_with_files + [ item.0 | combine({'file': item.1.stdout}) ] }}"
+  loop: "{{ mounts | zip(filenames.results) | list }}"
+
+- name: Create systemd files for mounts
+  ansible.builtin.template:
+    src: systemd.j2
+    dest: /etc/systemd/system/{{ item.file }}
+    force: true
+    backup: true
+  loop: "{{ mounts_with_files }}"
+
+- name: Enable & start autofs
+  ansible.builtin.systemd:
+    name: "{{ item.file }}"
+    enabled: yes
+    state: started
+  loop: "{{ mounts_with_files }}"

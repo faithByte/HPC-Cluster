@@ -1,0 +1,6 @@
+---
+
+# src in mounts must be the same as shared_folders in nfs-server
+mounts:
+  - { src: /mnt/shared, dest: /mnt/data }
+  - { src: /mnt/softs, dest: /mnt/softs }

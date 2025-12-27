@@ -1,0 +1,7 @@
+packages:  nfs-utils
+
+nfs_services:
+  - nfs-server
+  - rpcbind
+
+owner: nobody

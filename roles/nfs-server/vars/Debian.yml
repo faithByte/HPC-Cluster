@@ -1,0 +1,6 @@
+packages: nfs-kernel-server
+
+nfs_services:
+  - nfs-kernel-server
+
+owner: nogroup

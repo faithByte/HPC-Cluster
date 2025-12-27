@@ -39,8 +39,8 @@ This project is organized around **Ansible roles**, each responsible for one con
 | Mirror client      | ✓             | ✓             |
 | DNS server         | ✓             | ✓             |
 | DNS client         | ✓             | ✓             |
-| NFS server         |               |               |
-| NFS client         |               |               |
+| NFS server         | ✓             | ✓             |
+| NFS client         | ✓             | ✓             |
 | Slurmd             |               |               |
 | Slurmctl           |               |               |
 | Slurmdb            |               |               |
