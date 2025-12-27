@@ -1,4 +1,0 @@
----
-# INTERNAL_INTERFACE: eth0
-# DOMAIN_NAME: cluster.kaas
-config_dir: bind

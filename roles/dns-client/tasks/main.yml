@@ -1,45 +1,86 @@
 ---
-- name: Install resolvconf
+
+- name: Load OS-specific variables
+  ansible.builtin.include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Get internal interface
+  ansible.builtin.shell: |
+    ip route get {{ hostvars[groups['dns_servers'][0]].ansible_host }} | awk '{for(i=1;i<=NF;i++){if($i=="dev"){print $(i+1)}}}' 
+  register: output
+
+- name: Store internal_interface
+  set_fact:
+    internal_interface: "{{ output.stdout }}"
+
+- name: Install {{ package }}
   ansible.builtin.package:
-    pkg: resolvconf
+    pkg: "{{ package }}"
+    state: present
+  notify: "Start & enable NetworkManager"
+
+- name: Remove ifupdown [conflicts]
+  ansible.builtin.package:
+    pkg: ifupdown
+    state: absent
+
+# nmcli con mod eth1 ipv4.ignore-auto-dns yes
+- name: Ignore DHCP-provided DNS
+  community.general.nmcli:
+    conn_name: "{{ internal_interface }}"
+    type: ethernet
+    dns4_ignore_auto: yes
     state: present
 
-# temp
-- name: Add DNS server
-  ansible.builtin.lineinfile:
-    path: /etc/resolv.conf
-    line: nameserver {{ hostvars['dns'].ansible_host }}
-    insertbefore: BOF
+# nmcli con mod eth1 ipv4.dns "192.168.57.9"
+- name: Set DNS servers
+  community.general.nmcli:
+    conn_name: "{{ internal_interface }}"
+    type: ethernet
+    dns4: "{{ hostvars[item].ansible_host }}"
     state: present
-  
-# permanent
-- name: Add DNS server
-  ansible.builtin.lineinfile:
-    path: /etc/network/interfaces
-    regexp: '^iface eth0.*'
-    line: '\g<0>\ndns-nameserver {{ hostvars["dns"].ansible_host }}\n'
-    backrefs: yes
-    state: present
+  loop: "{{ groups['dns_servers'] }}"
 
-# - name: Restart your networking interface
-#   ansible.builtin.shell: |
-#     ifdown --force {{ internal_interface }} 
-#     ip addr flush dev {{ internal_interface }} 
-#     ifup --force {{ internal_interface }}
+- name: NetworkManager configuration
+  ansible.builtin.template:
+    src: config.j2
+    dest: /etc/NetworkManager/NetworkManager.conf
+    force: true
+    backup: true
+
+- name: Reload NetworkManager
+  ansible.builtin.service:
+    name: NetworkManager
+    state: restarted
+  # async: 60
+  poll: 0
+
+- name: Wait for SSH connection to return
+  ansible.builtin.wait_for_connection:
+    delay: 3
+    timeout: 60
+
+# To remove if using DHCP #####################################################################################################################
+- name: Assign a static IP (for Vagrant setups)
+  ansible.builtin.command: |
+    nmcli connection modify {{ internal_interface}} ipv4.method manual ipv4.addresses {{ ansible_host }}/24 ipv4.gateway {{ NETWORK_GATEWAY }}
+###############################################################################################################################################
+
+- name: Bring up connection 
+  ansible.builtin.command: |
+    nmcli connection up {{ internal_interface }}
+  loop: "{{ groups['dns_servers'] }}"
 
 - name: Add client to DNS server
   ansible.builtin.lineinfile:
     dest: "/etc/{{ config_dir }}/zones/db.{{ DOMAIN_NAME }}"
     line: "{{ inventory_hostname }}\t\tIN\tA\t{{ ansible_host }}"
     state: present
-  delegate_to: dns
-  # delegate_to: "{{ item }}"
-  # loop: "{{ groups['dns_servers'] }}"
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['dns_servers'] }}"
 
 - name: Reload dns server  
   ansible.builtin.systemd:
     name: named
     state: reloaded
-  delegate_to: dns
-  # delegate_to: "{{ item }}"
-  # loop: "{{ groups['dns_servers'] }}"
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['dns_servers'] }}"

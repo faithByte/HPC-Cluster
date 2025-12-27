@@ -35,6 +35,13 @@
     src: db.j2
     dest: "/etc/{{ config_dir }}/zones/db.{{ DOMAIN_NAME }}"
 
+- name: Add DNS servers to known zones
+  ansible.builtin.lineinfile:
+    dest: "/etc/{{ config_dir }}/zones/db.{{ DOMAIN_NAME }}"
+    line: "{{ item }}\t\tIN\tA\t{{ hostvars[item].ansible_host }}"
+    state: present
+  loop: "{{ groups['dns_servers'] }}"
+
 - name: Enable & start dns server  
   ansible.builtin.systemd:
     name: named

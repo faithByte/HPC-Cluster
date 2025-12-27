@@ -1,0 +1,7 @@
+---
+
+- name: Start & enable NetworkManager
+  ansible.builtin.service:
+    name: NetworkManager
+    state: started
+    enabled: true

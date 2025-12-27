@@ -5,7 +5,7 @@
     rule: allow
     port: dns # 53
     src: "{{ INTERNAL_NETWORK }}/{{ MASK }}"
-  when: #"'ufw' in ansible_facts.packages"
+  when:
     - ansible_facts.services is defined
     - ansible_facts.services['ufw.service'] is defined
     - ansible_facts.services['ufw.service'].state == 'running'

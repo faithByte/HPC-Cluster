@@ -1,0 +1,4 @@
+---
+# INTERNAL_INTERFACE: eth0
+config_dir: bind
+package: network-manager
