@@ -1,6 +1,6 @@
 # HPC Cluster
 
-This project automates the setup of an HPC cluster using Ansible.
+An Ansible-powered project that automates the creation of a fully functional HPC cluster — from bare nodes to parallel-ready in minutes.
 
 ## Requirements
 
@@ -37,8 +37,8 @@ This project is organized around **Ansible roles**, each responsible for one con
 | nginx server       | ✓             | ✓             |
 | Mirror server      | ✓             | ✓             |
 | Mirror client      | ✓             | ✓             |
-| DNS server         |               | ✓             |
-| DNS client         |               | ✓             |
+| DNS server         | ✓             | ✓             |
+| DNS client         | ✓             | ✓             |
 | NFS server         |               |               |
 | NFS client         |               |               |
 | Slurmd             |               |               |
