@@ -1,0 +1,27 @@
+- name: Get MAX UID
+  command: awk '/^UID_MAX/ {print $2}' /etc/login.defs
+  register: login_defs
+
+- name: Set MAX UID
+  ansible.builtin.set_fact:
+    maxID: "{{ login_defs.stdout | int }}"
+
+- name: Get MIN UID
+  command: awk '/^UID_MIN/ {print $2}' /etc/login.defs
+  register: login_defs
+
+- name: Set MIN UID
+  ansible.builtin.set_fact:
+    minID: "{{ login_defs.stdout | int }}"
+
+- name: Get available user/group ID
+  ansible.builtin.include_tasks: getID.yml
+
+- name: Set MIN UID
+  ansible.builtin.set_fact:
+    availableID: "{{ minID }}"
+
+- name:
+  debug:
+    msg: "{{ availableID }}"
+  when: MODE_DEBUG is defined
