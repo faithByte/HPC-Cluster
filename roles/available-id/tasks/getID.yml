@@ -1,36 +1,32 @@
-- name: Check if UID already exists on master
-  ansible.builtin.shell: getent passwd {{ item }} || getent group {{ item }}
-  register: uid_check
-  failed_when: minID == maxID and uid_check.rc == 0
-  loop: "{{ range(minID, maxID, 1) | list }}"
-  loop_control:
-    break_when: uid_check.rc != 0
-  run_once: true
-  delegate_to: master
-
-- name: update minID
-  ansible.builtin.set_fact:
-    minID: "{{ uid_check.results[-1].item }}"
+- name: Set global failure flag
+  set_fact:
+    global_failed: false
 
 - name: Assert 
   assert:
     that: 
-      - "minID <= maxID"
-    fail_msg: "Couldn't find Available UID | GID"
-    # success_msg: 
+      - "minID|int <= maxID|int"
 
-- name: 
-  block:
-    - name: Check if UID already exists on on other machines
-      ansible.builtin.shell: getent passwd {{ uid_check.results[-1].item }} || getent group {{ uid_check.results[-1].item }}
-      register: uid_node_check
-      failed_when: uid_node_check.rc == 0
-      any_errors_fatal: true
+- name: Check if UID already exists
+  ansible.builtin.shell: getent passwd {{ minID }} || getent group {{ minID }}
+  register: uid_check
+  ignore_errors: true
 
-  rescue:
-    - name: update minID
-      ansible.builtin.set_fact:
-        minID: "{{ minID + 1 }}"
+- name: Set local failure flag
+  set_fact:
+    global_failed: true
+  when: uid_check.rc == 0
 
-    - name:
-      ansible.builtin.include_tasks: getID.yml
+- name: Set global failure flag
+  set_fact:
+    global_failed: "{{ global_failed or hostvars[ item ]['global_failed']}}"
+  loop: "{{ ansible_play_hosts_all }}"
+
+- name: increment ID
+  ansible.builtin.set_fact:
+    minID: "{{ minID|int + 1 }}"
+  when: global_failed
+
+- name:
+  ansible.builtin.include_tasks: getID.yml
+  when: global_failed
