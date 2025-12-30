@@ -1,0 +1,6 @@
+
+- name: Build and install munge
+  ansible.builtin.shell: |
+    rpmbuild -tb /tmp/munge-{{ munge_version }}.tar.xz
+    cd $HOME/rpmbuild/RPMS/{{ ansible_architecture }}/
+    rpm --install --verbose munge-*

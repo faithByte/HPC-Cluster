@@ -1,0 +1,6 @@
+packages:
+  - rpm-build
+  - openssl-devel
+  - bzip2-devel
+  - zlib-devel
+  - pkgconfig

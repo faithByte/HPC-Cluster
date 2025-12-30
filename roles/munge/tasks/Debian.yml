@@ -1,0 +1,21 @@
+
+- name: Unarchive munge archive
+  ansible.builtin.unarchive:
+    src: "/tmp/munge-{{ munge_version }}.tar.xz"
+    dest: /tmp
+
+- name: Build and install munge
+  ansible.builtin.shell: |
+    cd /tmp/munge-{{ munge_version }}
+    ./configure \
+     --prefix=/usr \
+     --sysconfdir=/etc \
+     --localstatedir=/var \
+     --runstatedir=/run
+    make
+    make install
+
+- name: Clean munge
+  ansible.builtin.file:
+    path: /tmp/munge-{{ munge_version }}
+    state: absent

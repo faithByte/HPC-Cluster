@@ -1,0 +1,5 @@
+packages:
+  - libssl-dev
+  - libbz2-dev
+  - zlib1g-dev
+  - pkg-config

@@ -1,0 +1,98 @@
+---
+- name: get ID
+  include_role:
+    name: available-id
+
+- name: Load OS-specific variables
+  ansible.builtin.include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Create munge group 
+  ansible.builtin.group:
+    name: munge
+    gid: "{{ availableID }}"
+    state: present
+
+- name: Create munge user
+  ansible.builtin.user:
+    name: munge
+    uid: "{{ availableID }}"
+    group: munge
+    home: /var/lib/munge
+    create_home: true
+    shell: /sbin/nologin
+    system: true
+
+- name: Enable a RHSM repository
+  community.general.rhsm_repository:
+    name: codeready-builder-for-rhel-9-{{ ansible_architecture }}-rpms
+  when: ansible_distribution == "RedHat"
+
+- name: Install dependencies
+  ansible.builtin.package:
+    name: "{{ packages }}"
+    state: present
+
+- name: Get munge archive
+  ansible.builtin.get_url:
+    url: "https://github.com/dun/munge/releases/download/munge-{{ munge_version }}/munge-{{ munge_version }}.tar.xz"
+    dest: "/tmp/munge-{{ munge_version }}.tar.xz"
+    force: true
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: Broadcast munge archive
+  ansible.posix.synchronize:
+    src: /tmp/munge-{{ munge_version }}.tar.xz
+    dest: /tmp/munge-{{ munge_version }}.tar.xz
+    mode: push
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: Install munge
+  ansible.builtin.include_tasks: "{{ ansible_os_family }}.yml"
+
+- name: Set permissions on munge directories
+  ansible.builtin.file:
+    path: "{{ item.dir }}"
+    mode: "{{ item.mode }}"
+    owner: munge
+    group: munge
+    state: directory
+    recurse: yes
+  with_items:
+    - { dir: "/etc/munge/", mode: "0700"}
+    - { dir: "/var/lib/munge", mode: "0700"}
+    - { dir: "/var/log/munge", mode: "0700"}
+    - { dir: "/run/munge", mode: "0755"}
+
+- name: Generate munge key
+  ansible.builtin.shell:
+    cmd: /usr/sbin/mungekey -f
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+  
+- name: Broadcast munge key
+  ansible.posix.synchronize:
+    src: /etc/munge/munge.key
+    dest: /etc/munge/munge.key
+    mode: push
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: Change ownership of munge key
+  ansible.builtin.file:
+    path: "/etc/munge/munge.key"
+    owner: munge
+    group: munge
+    mode: "0600"
+
+- name: Enable & start munge
+  ansible.builtin.systemd:
+    name: munge
+    enabled: yes
+    state: restarted
+
+- name: Check if munge works fine
+  ansible.builtin.shell:
+    munge -n | ssh {{ ansible_host }} unmunge
+  loop: "{{ groups['cluster'] }}"
+  delegate_to: master
+  when: MODE_DEBUG is defined
