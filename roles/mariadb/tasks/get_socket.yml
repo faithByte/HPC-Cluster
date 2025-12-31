@@ -1,0 +1,9 @@
+- name: Get socket
+  ansible.builtin.shell: |
+    find / -type s -name "mysql*.sock" -print -quit
+  register: socket_info
+  failed_when: socket_info.stdout == ""
+
+- name: Set socket
+  ansible.builtin.set_fact:
+    socket: "{{ socket_info.stdout }}"

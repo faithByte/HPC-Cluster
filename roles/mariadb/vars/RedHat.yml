@@ -1,0 +1,8 @@
+packages:
+  - pip
+  - mariadb
+  - mariadb-devel
+  - mariadb-server
+  - python3-PyMySQL
+
+config_dir: /etc/my.cnf.d

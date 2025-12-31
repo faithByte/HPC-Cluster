@@ -1,0 +1,6 @@
+packages:
+  - pip
+  - mariadb-server
+  - python3-pymysql
+
+config_dir: /etc/mysql/conf.d

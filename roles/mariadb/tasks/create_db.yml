@@ -1,0 +1,11 @@
+- name: Get socket
+  ansible.builtin.include_tasks: "get_socket.yml"
+  when: socket is not defined
+
+- name: Create database
+  community.mysql.mysql_db:
+    name: "{{ db_name }}"
+    state: present
+    login_user: root
+    login_unix_socket: "{{ socket }}"
+  when: db_name is defined

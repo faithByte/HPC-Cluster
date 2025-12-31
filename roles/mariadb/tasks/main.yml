@@ -1,0 +1,22 @@
+
+- name: Load OS-specific variables
+  ansible.builtin.include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Install mariadb
+  ansible.builtin.package:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+
+- name: mysql configuration
+  ansible.builtin.template:
+    src: config.j2
+    dest: "{{ config_dir }}/mysql.cnf"
+    force: true
+    backup: true
+
+- name: Start & Enable mariadb
+  ansible.builtin.systemd:
+    name: mariadb
+    enabled: yes
+    state: restarted
