@@ -1,0 +1,6 @@
+
+- name: Build & install slurm
+  ansible.builtin.shell: |
+    rpmbuild -ta /tmp/slurm-{{ SLURM_VERSION }}.tar.bz2
+    cd $HOME/rpmbuild/RPMS/{{ ansible_architecture }}/
+    rpm --install --verbose slurm-*

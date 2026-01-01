@@ -1,0 +1,26 @@
+
+- name: Unarchive a file that needs to be downloaded (added in 2.0)
+  ansible.builtin.unarchive:
+    src: /tmp/slurm-{{ SLURM_VERSION }}.tar.bz2
+    dest: /tmp
+
+- name: Install & Build slurm
+  ansible.builtin.shell: |
+    cd /tmp/slurm-{{ SLURM_VERSION }}
+    echo y | mk-build-deps -i debian/control
+    debuild -b -uc -us
+    ./configure --prefix={{ SLURM_CONF_PATH }}
+    make install
+    ldconfig -n /usr/lib64
+
+- name: Set slurm commands in env PATH
+  ansible.builtin.lineinfile:
+    path: /etc/profile.d/bash_completion.sh
+    line: "export PATH={{ SLURM_CONF_PATH }}/sbin:{{ SLURM_CONF_PATH }}/bin:$PATH"
+    create: yes
+
+- name: Clean slurm
+  ansible.builtin.file:
+    path: /tmp/slurm-{{ SLURM_VERSION }}
+    state: absent
+

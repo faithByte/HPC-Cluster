@@ -1,0 +1,5 @@
+dependencies:
+  - role: munge
+  - role: mariadb
+
+# crb repos must be enabled on rocky9 nodes

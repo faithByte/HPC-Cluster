@@ -1,0 +1,29 @@
+
+packages:
+  - epel-release
+  - dnf-plugins-core
+  - rpm-build
+  - gcc
+  # - python3
+  - pam-devel
+  - numactl
+  - numactl-devel
+  - hwloc
+  - hwloc-devel
+  - epel-release
+  # - openssl
+  # - openssl-devel
+  - lua
+  - lua-devel
+  - readline-devel
+  - rrdtool-devel
+  - ncurses-devel
+  - gtk2-devel
+  - libibmad
+  - libibumad
+  - perl-Switch
+  - perl-ExtUtils-MakeMaker
+  - xorg-x11-xauth
+  # cgroup v2
+  - dbus-devel
+  - systemd-devel

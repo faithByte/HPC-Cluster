@@ -1,0 +1,61 @@
+---
+- name: get ID
+  include_role:
+    name: available-id
+
+- name: Load OS-specific variables
+  ansible.builtin.include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Create slurm group 
+  ansible.builtin.group:
+    name: slurm
+    gid: "{{ availableID }}"
+    state: present
+
+- name: Create slurm user
+  ansible.builtin.user:
+    name: slurm
+    uid: "{{ availableID }}"
+    group: slurm
+    home: /var/lib/slurm
+    create_home: true
+    shell: /bin/bash
+    system: true
+    state: present
+
+- name: Download installation dependencies
+  ansible.builtin.package:
+    name: "{{ packages }}"
+    state: present
+
+- name: Get slurm archive
+  ansible.builtin.get_url:
+    url: "https://download.schedmd.com/slurm/slurm-{{ SLURM_VERSION }}.tar.bz2"
+    dest: "/tmp/slurm-{{ SLURM_VERSION }}.tar.bz2"
+    force: true
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: Broadcast munge archive
+  ansible.posix.synchronize:
+    src: /tmp/slurm-{{ SLURM_VERSION }}.tar.bz2
+    dest: /tmp/slurm-{{ SLURM_VERSION }}.tar.bz2
+    mode: push
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: Create slurm directory
+  ansible.builtin.file:
+    path: "{{ SLURM_CONF_PATH }}"
+    owner: slurm
+    group: slurm
+    state: directory
+
+- name: Install slurm
+  ansible.builtin.include_tasks: "{{ ansible_os_family }}.yml"
+
+- name: Clean slurm
+  ansible.builtin.file:
+    path: /tmp/slurm-{{ SLURM_VERSION }}.tar.bz2
+    state: absent
+  changed_when: true
+  notify: SLURM Firewall Setup
