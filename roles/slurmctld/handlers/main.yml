@@ -1,0 +1,9 @@
+---
+
+- name: Reload slurmctld
+  ansible.builtin.service:
+    name: slurmctld
+    state: reloaded
+    enabled: true
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['masters'] }}"

@@ -1,0 +1,2 @@
+path: "{{ SLURM_CONF_PATH }}/etc"
+slurm_commands_path: "{{ SLURM_CONF_PATH }}/sbin"

@@ -1,0 +1,58 @@
+---
+
+- name: Load OS-specific variables
+  ansible.builtin.include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Set a hostname
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}.{{ DOMAIN_NAME }}"
+
+- name: Create slurm directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: slurm
+    group: slurm
+    state: directory
+    recurse: yes
+    mode: "0755"
+  with_items:
+    - /var/spool/slurmctld
+    - /var/spool/slurmd
+
+- name: Create slurm logfiles
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: slurm
+    group: slurm
+    state: touch
+    mode: "0755"
+  with_items:
+    - /var/log/slurmctld.log
+    - /var/log/slurm_jobacct.log
+    - /var/log/slurm_jobcomp.log
+
+- name: Configure cgroup
+  ansible.builtin.template:
+    src: cgroup.conf.j2
+    dest: "{{ SLURM_CONF_PATH }}/cgroup.conf"
+
+- name: Configure slurm
+  ansible.builtin.template:
+    src: slurm.conf.j2
+    dest: "{{ SLURM_CONF_PATH }}/slurm.conf"
+
+- name: Configure slurmctld service
+  ansible.builtin.template:
+    src: slurmctld.service.j2
+    dest: "/usr/lib/systemd/system/slurmctld.service"
+    force: true
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: yes
+
+- name: Enable & start slurmctld
+  ansible.builtin.systemd:
+    name: slurmctld
+    enabled: yes
+    state: restarted
