@@ -1,0 +1,63 @@
+
+- name: Load OS-specific variables
+  ansible.builtin.include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Set a hostname
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}.{{ DOMAIN_NAME }}"
+
+# SLURMCTLD
+- name: Get hardware info
+  ansible.builtin.shell:
+    '{{ slurm_commands_path }}/slurmd -C | grep "NodeName" | sed "s/\(NodeName=\)[^ ]*/\1`hostname`/"'
+  register: hw
+
+- name: Set node
+  ansible.builtin.lineinfile:
+    path: "{{ SLURM_CONF_PATH }}/slurm.conf"
+    line: "{{ hw.stdout }}"
+  delegate_to: "{{ item }}"
+  changed_when: true
+  loop: "{{ groups['masters'] }}"
+
+- name: Reload slurmctld
+  ansible.builtin.service:
+    name: slurmctld
+    state: reloaded
+    enabled: true
+  delegate_to: "{{ item }}"
+  loop: "{{ groups['masters'] }}"
+
+# SLURMD
+- name: Create slurmd directory
+  ansible.builtin.file:
+    path: /var/spool/slurmd
+    owner: slurm
+    group: slurm
+    state: directory
+    recurse: yes
+    mode: "0755"
+
+- name: Create slurm logfile
+  ansible.builtin.file:
+    path: /var/log/slurmd.log
+    owner: slurm
+    group: slurm
+    state: touch
+    mode: "0755"
+
+- name: Configure slurmd service
+  ansible.builtin.template:
+    src: slurmd.service.j2
+    dest: "/usr/lib/systemd/system/slurmd.service"
+    force: true
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: yes
+
+- name: Enable & start slurmd
+  ansible.builtin.systemd:
+    name: slurmd
+    enabled: yes
+    state: started

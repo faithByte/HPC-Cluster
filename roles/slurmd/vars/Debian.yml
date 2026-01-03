@@ -1,0 +1,1 @@
+slurm_commands_path: "{{ SLURM_CONF_PATH }}/sbin"
