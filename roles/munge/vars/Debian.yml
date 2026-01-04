@@ -3,3 +3,4 @@ packages:
   - libbz2-dev
   - zlib1g-dev
   - pkg-config
+  - chrony

@@ -4,3 +4,4 @@ packages:
   - bzip2-devel
   - zlib-devel
   - pkgconfig
+  - chrony

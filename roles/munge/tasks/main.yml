@@ -21,6 +21,7 @@
     create_home: true
     shell: /sbin/nologin
     system: true
+    state: present
 
 - name: Enable a RHSM repository
   community.general.rhsm_repository:
@@ -84,11 +85,14 @@
     group: munge
     mode: "0600"
 
-- name: Enable & start munge
+- name: Enable & start chrony and munge
   ansible.builtin.systemd:
-    name: munge
+    name: "{{ item }}"
     enabled: yes
     state: restarted
+  loop:
+    - munge
+    - chronyd
 
 - name: Check if munge works fine
   ansible.builtin.shell:
