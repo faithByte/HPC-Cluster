@@ -6,4 +6,7 @@
     from_ip: "{{ INTERNAL_NETWORK }}/{{ MASK }}"
     to_port: http
     proto: tcp
-  when: "'ufw' in ansible_facts.packages"
+  when: 
+    - ansible_facts.services is defined
+    - ansible_facts.services['ufw.service'] is defined
+    - ansible_facts.services['ufw.service'].state == 'running'

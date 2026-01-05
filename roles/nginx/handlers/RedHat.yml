@@ -2,8 +2,12 @@
 
 - name: Allow HTTP from internal network
   ansible.posix.firewalld:
-    rich_rule: 'rule family="ipv4" source address="{{ INTERNAL_NETWORK }}" service name="http" accept'
-    state: enabled
+    # zone: internal
+    service: http #80
     permanent: true
+    state: enabled
     immediate: true
-  when: "'firewalld' in ansible_facts.packages"
+  when: 
+    - ansible_facts.services is defined
+    - ansible_facts.services['firewalld.service'] is defined
+    - ansible_facts.services['firewalld.service'].state == 'running'
