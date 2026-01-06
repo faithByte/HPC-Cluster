@@ -1,0 +1,14 @@
+- name: Get socket
+  ansible.builtin.include_tasks: "get_socket.yml"
+  when: socket is not defined
+
+- name: Create application user
+  community.mysql.mysql_user:
+    name: "{{ user }}"
+    password: "{{ password }}"
+    host: localhost
+    priv: "{{ db_name }}.*:ALL"
+    state: present
+    login_user: root
+    login_unix_socket: "{{ socket }}"
+  when: db_name is defined and password is defined and new_user is defined
