@@ -1,0 +1,126 @@
+---
+
+- set_fact:
+    architecture: >-
+      {{
+        'amd64' if ansible_architecture in ['amd64', 'x86_64']
+        else 'arm64' if ansible_architecture in ['arm64', 'aarch64']
+        else ansible_architecture
+      }}
+
+# RUNC #########################################################################################################################
+- name: Get runc
+  ansible.builtin.get_url:
+    url: "https://github.com/opencontainers/runc/releases/download/v{{ RUNC_VERSION }}/runc.{{ architecture }}"
+    dest: "/tmp/runc.{{ architecture }}"
+    force: true
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: Broadcast runc
+  ansible.posix.synchronize:
+    src: "/tmp/runc.{{ architecture }}"
+    dest: "/tmp/runc.{{ architecture }}"
+    mode: push
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: Install runc
+  ansible.builtin.shell: |
+    install -m 755 /tmp/runc.amd64 /usr/local/sbin/runc
+################################################################################################################################
+
+# CRICTL #######################################################################################################################
+- name: Get crictl archive
+  ansible.builtin.get_url:
+    url: "https://github.com/kubernetes-sigs/cri-tools/releases/download/v{{ CRICTL_VERSION }}/crictl-v{{ CRICTL_VERSION }}-linux-{{ architecture }}.tar.gz"
+    dest: "/tmp/crictl-{{ CRICTL_VERSION }}-linux-{{ architecture }}.tar.gz"
+    force: true
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: Broadcast containerd archive
+  ansible.posix.synchronize:
+    src: /tmp/crictl-{{ CRICTL_VERSION }}-linux-{{ architecture }}.tar.gz
+    dest: /tmp/crictl-{{ CRICTL_VERSION }}-linux-{{ architecture }}.tar.gz
+    mode: push
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: Unarchive containerd archive
+  ansible.builtin.unarchive:
+    src: "/tmp/crictl-{{ CRICTL_VERSION }}-linux-{{ architecture }}.tar.gz"
+    dest: /usr/local/sbin
+
+- name: Configure crictl to use containerd
+  ansible.builtin.template:
+    src: crictl.yaml.j2
+    dest: /etc/crictl.yaml
+    force: true
+    backup: true
+################################################################################################################################
+
+# CONTAINERD #####################################################################################################################
+- name: Get containerd archive
+  ansible.builtin.get_url:
+    url: "https://github.com/containerd/containerd/releases/download/v{{ CONTAINERD_VERSION }}/containerd-{{ CONTAINERD_VERSION }}-linux-{{ architecture }}.tar.gz"
+    dest: "/tmp/containerd-{{ CONTAINERD_VERSION }}-linux-{{ architecture }}.tar.gz"
+    force: true
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: Broadcast containerd archive
+  ansible.posix.synchronize:
+    src: /tmp/containerd-{{ CONTAINERD_VERSION }}-linux-{{ architecture }}.tar.gz
+    dest: /tmp/containerd-{{ CONTAINERD_VERSION }}-linux-{{ architecture }}.tar.gz
+    mode: push
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: Unarchive containerd archive
+  ansible.builtin.unarchive:
+    src: "/tmp/containerd-{{ CONTAINERD_VERSION }}-linux-{{ architecture }}.tar.gz"
+    dest: /usr/local
+
+- name: Create containerd folder
+  ansible.builtin.file:
+    path: /etc/containerd
+    state: directory
+
+- name: Configure containerd
+  ansible.builtin.shell: |
+    containerd config default > /etc/containerd/config.toml
+    sed -i 's/            SystemdCgroup = false/            SystemdCgroup = true/' /etc/containerd/config.toml
+
+- name: Create containerd systemd service
+  ansible.builtin.template:
+    src: containerd.service.j2
+    dest: /etc/systemd/system/containerd.service
+    force: true
+    backup: true
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: yes
+
+- name: Enable & start containerd
+  ansible.builtin.systemd:
+    name: containerd
+    enabled: yes
+    state: restarted
+################################################################################################################################
+
+- name: Clean 
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "/tmp/containerd-{{ CONTAINERD_VERSION }}-linux-{{ architecture }}.tar.gz"
+    - "/tmp/runc.{{ architecture }}"
+    - "/tmp/crictl-{{ CRICTL_VERSION }}-linux-{{ architecture }}.tar.gz"
+
+- name: Set containerd commands in env PATH
+  ansible.builtin.include_tasks: add_to_path.yml
+  loop:
+    - /usr/local/bin
+    - /usr/local/sbin
+
+# sudo ctr image pull docker.io/library/busybox:latest
+# sudo ctr run --rm -t docker.io/library/busybox:latest test-runc echo "runc works"

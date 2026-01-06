@@ -1,0 +1,12 @@
+- name: Check if {{ item }} is in PATH
+  ansible.builtin.shell: 'echo "$PATH" | tr ":" "\n" | grep -qx {{ item }}'
+  register: path_check
+  ignore_errors: yes
+  changed_when: false
+
+- name: Add {{ item }} to PATH
+  ansible.builtin.lineinfile:
+    path: /etc/profile.d/bash_completion.sh
+    create: yes
+    line: 'export PATH="{{ item }}:$PATH"'
+  when: path_check.rc != 0
