@@ -1,0 +1,6 @@
+[kubernetes]
+name=Kubernetes
+baseurl={{ KUBE_URL }}/core:/stable:/v{{ KUBERENETES_VERSION }}/rpm/
+enabled=1
+gpgcheck=1
+gpgkey={{ KUBE_URL }}/core:/stable:/v{{ KUBERENETES_VERSION }}/rpm/repodata/repomd.xml.key

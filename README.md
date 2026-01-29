@@ -41,10 +41,10 @@ This project is organized around **Ansible roles**, each responsible for one con
 | DNS client         | ✓             | ✓             |
 | NFS server         | ✓             | ✓             |
 | NFS client         | ✓             | ✓             |
-| Slurmd             |               |               |
-| Slurmctl           |               |               |
+| Slurmd             | ✓             | ✓             |
+| Slurmctl           | ✓             | ✓             |
 | Slurmdb            |               |               |
-| Kubernetes cluster |               |               |
+| Kubernetes cluster | ✓             | ✓             |
 | Xcat               |               |               |
 | LDAP server        |               |               |
 | LDAP client        |               |               |

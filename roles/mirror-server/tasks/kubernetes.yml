@@ -1,0 +1,42 @@
+---
+
+- name: Load OS-specific variables
+  ansible.builtin.include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Add Kubernetes repo to mirror-list
+  ansible.builtin.blockinfile:
+    path: "{{ repo_config_dest }}"
+    block: "{{ kube_config }}"
+
+- name: get kube packages
+  ansible.builtin.shell: "{{ kube_mirror_command }}"
+
+- name: Create link path
+  ansible.builtin.file:
+    path: "{{ kube_link.dest }}"
+    state: directory
+
+- name: Create link path
+  ansible.builtin.file:
+    path: "{{ kube_link.dest }}"
+    state: absent
+
+- name: Serve kube repo via Nginx
+  ansible.builtin.file:
+    src: "{{ kube_link.src }}"
+    dest: "{{ kube_link.dest }}"
+    state: link
+
+- name: Download key
+  ansible.builtin.get_url:
+    url: https://pkgs.k8s.io/core:/stable:/v{{ KUBERENETES_VERSION }}/rpm/repodata/repomd.xml.key
+    dest: "{{ kube_link.dest }}/repodata/"
+  when: ansible_os_family == "RedHat"
+
+- name: Automate kube repo Sync
+  ansible.builtin.cron:
+    name: "Sync kube repo"
+    hour: "3"
+    minute: "0"
+    job: '{{ kube_mirror_command }} > /var/log/{{ repo_name }}.log'
+  when: ansible_os_family == "RedHat"

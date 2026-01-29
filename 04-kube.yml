@@ -1,0 +1,33 @@
+
+- name: 
+  hosts: cluster
+  roles:
+    - containerd
+
+- name:
+  hosts: masters
+  vars:
+    type:
+      - kubernetes
+      - registry_pull_through
+  roles:
+    - mirror-server
+
+- name:
+  hosts: cluster
+  vars:
+    type:
+      - registry_pull_through
+  roles:
+    - mirror-client
+    - kubeadm
+
+- name: 
+  hosts: masters
+  roles:
+    - kube-master
+
+- name:
+  hosts: nodes
+  roles:
+    - kube-node

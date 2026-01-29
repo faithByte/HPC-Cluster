@@ -1,0 +1,57 @@
+
+- name: Install dependencies
+  ansible.builtin.apt:
+    pkg:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gpg
+    state: present
+
+- name: Create keyrings folder
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+  
+- name: Get Kubernetes GPG key
+  ansible.builtin.apt_key:
+    url: https://pkgs.k8s.io/core:/stable:/v{{ KUBERENETES_VERSION }}/deb/Release.key
+    keyring: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+  retries: 5
+  delay: 3
+  register: job
+  until: job.failed == false
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: Broadcast Kubernetes GPG key
+  ansible.posix.synchronize:
+    src: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    dest: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    mode: push
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: Add Kubernetes repo
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] {{ KUBE_URL }}/core:/stable:/v{{ KUBERENETES_VERSION }}/deb/ /"
+    filename: /etc/apt/sources.list.d/kubernetes.list
+    state: present
+    update_cache: true
+
+- name: Install [kubeadm, kubelet, kubectl]
+  ansible.builtin.apt:
+    pkg:
+      - kubelet
+      - kubeadm
+      - kubectl
+    state: present
+    update_cache: yes
+
+- name: Hold
+  ansible.builtin.dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  with_items:
+    - kubeadm
+    - kubelet
+    - kubectl

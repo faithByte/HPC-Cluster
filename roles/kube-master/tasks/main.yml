@@ -1,0 +1,22 @@
+---
+- name: Init cluster
+  ansible.builtin.shell:
+    # cmd: kubeadm init --pod-network-cidr=10.244.0.0/16 --control-plane-endpoint={{ ansible_hostname }}.{{ DOMAIN_NAME }}:6443
+    cmd: kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address={{ ansible_host }}
+  notify: Control plane Firewall Setup
+
+- name: Create kube folder
+  ansible.builtin.file:
+    path: "{{ lookup('env','HOME') }}/.kube"
+    state: directory
+
+- name: Create kube config
+  ansible.builtin.copy:
+    src: /etc/kubernetes/admin.conf
+    dest: "{{ lookup('env','HOME') }}/.kube/config"
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_gid }}"
+
+- name: Install network addon
+  ansible.builtin.shell:
+    cmd: kubectl apply -f https://reweave.azurewebsites.net/k8s/v1.29/net.yaml

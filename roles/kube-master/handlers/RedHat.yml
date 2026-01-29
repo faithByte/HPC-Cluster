@@ -1,0 +1,19 @@
+---
+
+- name: Control plane Firewall Setup
+  ansible.posix.firewalld:
+    # zone: internal
+    port: "{{ item }}/tcp"
+    permanent: true
+    state: enabled
+    immediate: true
+  loop:
+    - 6443 # Kubernetes API server
+    - 2379-2380 # etcd server client API
+    - 10250 # Kubelet API
+    - 10259 # kube-scheduler
+    - 10257 # kube-controller-manager
+  when: 
+    - ansible_facts.services is defined
+    - ansible_facts.services['firewalld.service'] is defined
+    - ansible_facts.services['firewalld.service'].state == 'running'

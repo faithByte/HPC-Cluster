@@ -1,0 +1,59 @@
+---
+
+# - name: Load OS-specific variables
+#   ansible.builtin.include_vars: "{{ ansible_os_family }}.yml"
+
+# kubelet is to fail to start if swap memory is detected on a node
+- name: Unmount swap
+  ansible.builtin.shell:
+    cmd: swapoff -a
+    
+- name: Disable swap
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    regexp: '\sswap\s+sw\s+'
+    state: absent
+# ---
+
+- name: Create a file for the containerd module
+  ansible.builtin.file:
+    path: /etc/modules-load.d/k8s.conf
+    state: touch
+
+- name: Configure modules for containerd
+  blockinfile:
+    path: /etc/modules-load.d/k8s.conf
+    block: |
+      overlay
+      br_netfilter
+
+- name: Load modules
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - overlay
+    - br_netfilter
+
+# Apply sysctl params without reboot
+- name: Enable IPv4 packet forwarding
+  ansible.posix.sysctl:
+    name: "{{ item }}"
+    value: '1'
+    sysctl_set: true
+    state: present
+    reload: true
+  with_items:
+    - net.bridge.bridge-nf-call-iptables
+    - net.ipv4.ip_forward
+    - net.bridge.bridge-nf-call-ip6tables
+###
+
+- name: Load OS-specific tasks
+  ansible.builtin.include_tasks: "{{ ansible_os_family }}.yml"
+
+- name: Enable & Start kubelet
+  ansible.builtin.service:
+    name: kubelet
+    state: started
+    enabled: true

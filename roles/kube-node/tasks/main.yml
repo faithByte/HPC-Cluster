@@ -1,0 +1,11 @@
+- name: Get command to join the cluster
+  ansible.builtin.shell: 
+    cmd: kubeadm token create --print-join-command
+  register: join_command
+  run_once: yes
+  delegate_to: "{{ groups['masters'] | first }}"
+
+- name: Join the cluster
+  ansible.builtin.shell: 
+    cmd: "{{ join_command.stdout }}"
+  notify: Worker node Firewall Setup

@@ -1,0 +1,18 @@
+---
+
+- name: Control plane Firewall Setup
+  community.general.ufw:
+    rule: allow
+    from_ip: "{{ INTERNAL_NETWORK }}/{{ MASK }}"
+    to_port: "{{ item }}"
+    proto: tcp
+  loop:
+    - 6443 # Kubernetes API server
+    - 2379-2380 # etcd server client API
+    - 10250 # Kubelet API
+    - 10259 # kube-scheduler
+    - 10257 # kube-controller-manager
+  when: 
+    - ansible_facts.services is defined
+    - ansible_facts.services['ufw.service'] is defined
+    - ansible_facts.services['ufw.service'].state == 'running'

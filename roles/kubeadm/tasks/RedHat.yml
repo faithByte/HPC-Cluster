@@ -1,0 +1,20 @@
+- name: "Set SELinux to permissive mode [temporary]"
+  ansible.builtin.shell: |
+    setenforce 0
+    sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+
+- name: Setup kubernetes repo
+  ansible.builtin.template:
+    src: kubernetes.repo.j2
+    dest: /etc/yum.repos.d/kubernetes.repo
+    force: true
+    backup: true
+
+- name: Install [kubeadm, kubelet, kubectl]
+  ansible.builtin.dnf:
+    pkg:
+      - kubelet
+      - kubeadm
+      - kubectl
+    state: present
+    disable_excludes: kubernetes

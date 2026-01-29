@@ -1,0 +1,18 @@
+---
+
+- name: Worker node Firewall Setup
+  ansible.posix.firewalld:
+    # zone: internal
+    port: "{{ item }}"
+    permanent: true
+    state: enabled
+    immediate: true
+  loop:
+    - 10250/tcp # Kubelet API
+    - 10256/tcp # kube-proxy
+    - 30000-32767/tcp # NodePort Services
+    - 30000-32767/udp # NodePort Services
+  when:
+    - ansible_facts.services is defined
+    - ansible_facts.services['firewalld.service'] is defined
+    - ansible_facts.services['firewalld.service'].state == 'running'
