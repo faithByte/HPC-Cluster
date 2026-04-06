@@ -2,7 +2,8 @@
 
 - name: DNS Firewall Setup
   ansible.posix.firewalld:
-    service: dns
+    # zone: internal
+    service: dns #53
     permanent: true
     state: enabled
     immediate: true

@@ -1,0 +1,9 @@
+- name: 
+  hosts: nfs
+  roles:
+    - nfs-server
+
+- name:
+  hosts: cluster
+  roles:
+    - nfs-client

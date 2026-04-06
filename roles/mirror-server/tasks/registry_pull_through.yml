@@ -1,0 +1,32 @@
+
+- name: Create registries directories
+  ansible.builtin.file:
+    path: "/srv/registry-{{ item }}"
+    state: directory
+  loop:
+    - docker
+    - k8s
+
+- name: Pull docker.io/library/registry:2
+  ansible.builtin.command:
+    /usr/local/bin/ctr image pull docker.io/library/registry:2
+
+- name: Set a simple fact
+  ansible.builtin.set_fact:
+    registry_port: 5000
+
+- name: Setup docker.io registry
+  ansible.builtin.command:
+    /usr/local/bin/ctr run -d --net-host --env REGISTRY_HTTP_ADDR=:{{ registry_port }} --env REGISTRY_PROXY_REMOTEURL=https://registry-1.docker.io --mount type=bind,src=/srv/registry-docker,dst=/var/lib/registry-docker,options=rbind:rw docker.io/library/registry:2 registry-docker
+  notify: Registry Firewall Setup
+
+- meta: flush_handlers
+
+- name: Set a simple fact
+  ansible.builtin.set_fact:
+    registry_port: 5001
+
+- name: Setup k8s.io registry
+  ansible.builtin.command:
+    /usr/local/bin/ctr run -d --net-host --env REGISTRY_HTTP_ADDR=:{{ registry_port }} --env REGISTRY_PROXY_REMOTEURL=https://registry.k8s.io --mount type=bind,src=/srv/registry-k8s,dst=/var/lib/registry-k8s,options=rbind:rw docker.io/library/registry:2 registry-k8s
+  notify: Registry Firewall Setup

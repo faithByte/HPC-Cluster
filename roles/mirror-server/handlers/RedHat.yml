@@ -1,0 +1,25 @@
+---
+
+- name: Rsync Firewall Setup
+  ansible.posix.firewalld:
+    # zone: internal
+    service: rsyncd #873
+    permanent: true
+    state: enabled
+    immediate: true
+  when: 
+    - ansible_facts.services is defined
+    - ansible_facts.services['firewalld.service'] is defined
+    - ansible_facts.services['firewalld.service'].state == 'running'
+
+- name: Registry Firewall Setup
+  ansible.posix.firewalld:
+    # zone: internal
+    port: "{{ registry_port }}/tcp"
+    state: enabled
+    permanent: yes
+    immediate: true
+  when: 
+    - ansible_facts.services is defined
+    - ansible_facts.services['firewalld.service'] is defined
+    - ansible_facts.services['firewalld.service'].state == 'running'

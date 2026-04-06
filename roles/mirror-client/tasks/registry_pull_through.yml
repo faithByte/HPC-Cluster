@@ -1,0 +1,33 @@
+
+- name: Create containerd hosts folder
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - /etc/containerd/certs.d/docker.io/
+    - /etc/containerd/certs.d/registry.k8s.io/
+
+- name: Configure docker.io
+  vars:
+    server: https://docker.io
+    port: 5000
+  ansible.builtin.template:
+    src: hosts.toml.j2
+    dest: /etc/containerd/certs.d/docker.io/hosts.toml
+
+- name: Configure k8s.io
+  vars:
+    server: https://registry.k8s.io
+    port: 5001
+  ansible.builtin.template:
+    src: hosts.toml.j2
+    dest: /etc/containerd/certs.d/registry.k8s.io/hosts.toml
+
+- name: Change containerd config path 
+  ansible.builtin.command:
+    sed -i "s|config_path = '/etc/containerd/certs.d:/etc/docker/certs.d'|config_path = '/etc/containerd/certs.d'|" /etc/containerd/config.toml
+
+- name: Restart containerd
+  ansible.builtin.systemd:
+    name: containerd
+    state: restarted

@@ -1,0 +1,23 @@
+---
+
+- name: Rsync Firewall Setup
+  community.general.ufw:
+    rule: allow
+    port: http
+    src: "{{ INTERNAL_NETWORK }}/{{ MASK }}"
+  when:
+    - ansible_facts.services is defined
+    - ansible_facts.services['ufw.service'] is defined
+    - ansible_facts.services['ufw.service'].state == 'running'
+
+
+- name: Registry Firewall Setup
+  community.general.ufw:
+    rule: allow
+    port: "{{ REGISTRY_PORT }}"
+    src: "{{ INTERNAL_NETWORK }}/{{ MASK }}"
+  when:
+    - firewalld in ansible_facts.packages
+    - ansible_facts.services is defined
+    - ansible_facts.services['ufw.service'] is defined
+    - ansible_facts.services['ufw.service'].state == 'running'

@@ -27,6 +27,7 @@
 - name: Ignore DHCP-provided DNS
   community.general.nmcli:
     conn_name: "{{ internal_interface }}"
+    ifname: "{{ internal_interface }}"
     type: ethernet
     dns4_ignore_auto: yes
     state: present
@@ -35,6 +36,7 @@
 - name: Set DNS servers
   community.general.nmcli:
     conn_name: "{{ internal_interface }}"
+    ifname: "{{ internal_interface }}"
     type: ethernet
     dns4: "{{ hostvars[item].ansible_host }}"
     state: present

@@ -11,3 +11,11 @@ repo_config_dest: '/etc/apt/mirror.list'
 repos_links: 
   - { src: '{{ repos_path }}/{{ repo_name }}/mirror/deb.debian.org/debian/', dest: "{{ nginx_path }}/{{ repo_name }}" }
   - { src: '{{ repos_path }}/{{ repo_name }}/mirror/security.debian.org/debian-security/', dest: "{{ nginx_path }}/{{ repo_name }}-security" }
+
+kube_config: |
+  deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v{{ KUBERENETES_VERSION }}/deb/ /
+
+kube_mirror_command: apt-mirror
+
+kube_link: { src: "{{ repos_path }}/{{ repo_name }}/mirror/pkgs.k8s.io/core:", dest: "{{ nginx_path }}/core:" }
+  

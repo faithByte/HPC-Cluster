@@ -1,0 +1,10 @@
+
+- name:
+  hosts: dns
+  roles:
+    - dns-server
+
+- name:
+  hosts: all:!dns_servers
+  roles:
+    - dns-client

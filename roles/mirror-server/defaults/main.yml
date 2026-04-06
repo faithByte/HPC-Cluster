@@ -1,1 +1,3 @@
 ansible_os_family: RedHat
+type: 
+  - mirror_server

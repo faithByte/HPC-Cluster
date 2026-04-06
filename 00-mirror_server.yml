@@ -1,0 +1,11 @@
+
+- name: 
+  hosts: masters
+  roles:
+    - nginx
+    - mirror-server
+
+- name:  
+  hosts: nodes
+  roles:
+    - mirror-client

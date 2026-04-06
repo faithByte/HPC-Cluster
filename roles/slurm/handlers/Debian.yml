@@ -1,12 +1,16 @@
 ---
 
-- name: NFS Firewall Setup
+- name: SLURM Firewall Setup
   community.general.ufw:
     # zone: internal
     rule: allow
     from_ip: "{{ INTERNAL_NETWORK }}/{{ MASK }}"
-    to_port: nfs,rpc-bind
+    to_port: "{{ item }}"
     proto: tcp
+  loop:
+    - "{{ SLURMD_PORT }}/tcp"
+    - "{{ SLURMCTLD_PORT }}/tcp"
+    - "{{ SRUN_PORTS }}/tcp"
   when:
     - ansible_facts.services is defined
     - ansible_facts.services['ufw.service'] is defined

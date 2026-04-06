@@ -15,8 +15,17 @@
 
 - name: Set slurm commands in env PATH
   ansible.builtin.lineinfile:
-    path: /etc/profile.d/bash_completion.sh
+    path: "{{ item }}"
     line: "export PATH={{ SLURM_CONF_PATH }}/sbin:{{ SLURM_CONF_PATH }}/bin:$PATH"
+    create: yes
+  with_items:
+    - /etc/profile.d/bash_completion.sh
+    - /etc/bash.bashrc
+
+- name: Set env VAR
+  ansible.builtin.lineinfile:
+    path: "/etc/environment"
+    line: "SLURM_CONF={{ SLURM_CONF_PATH }}/slurm.conf"
     create: yes
 
 - name: Clean slurm

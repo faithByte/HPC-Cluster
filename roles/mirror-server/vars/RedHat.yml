@@ -5,10 +5,23 @@ packages:
 
 repo_name: rocky9
 
-mirror_command: dnf reposync --repoid=rocky9-baseos --repoid=rocky9-appstream --download-metadata --delete --destdir={{ repos_path }}/{{ repo_name }}
-# mirror_command: dnf reposync --repoid=rocky9-baseos --repoid=rocky9-appstream --repoid=rocky9-crb --repoid=rocky9-extras --download-metadata --delete --destdir={{ repos_path }}/{{ repo_name }}
+# mirror_command: dnf reposync --repoid=rocky9-baseos --repoid=rocky9-appstream --download-metadata --delete --destdir={{ repos_path }}/{{ repo_name }}
+mirror_command: dnf reposync --repoid=rocky9-baseos --repoid=rocky9-appstream --repoid=rocky9-crb --repoid=rocky9-extras --download-metadata --delete --destdir={{ repos_path }}/{{ repo_name }}
 
 repo_config_dest: '/etc/yum.repos.d/rocky9.repo'
 
 repos_links: 
   - { src: "{{ repos_path }}/{{ repo_name }}", dest: "{{ nginx_path }}/{{ repo_name }}" }
+
+kube_config: |
+  [kubernetes]
+  name=Kubernetes
+  baseurl=https://pkgs.k8s.io/core:/stable:/v{{ KUBERENETES_VERSION }}/rpm/
+  enabled=1
+  gpgcheck=1
+  gpgkey=https://pkgs.k8s.io/core:/stable:/v{{ KUBERENETES_VERSION }}/rpm/repodata/repomd.xml.key
+
+kube_mirror_command: dnf reposync --repoid=kubernetes --download-metadata --delete --destdir={{ repos_path }}/{{ repo_name }}
+
+kube_link: { src: "{{ repos_path }}/{{ repo_name }}/kubernetes", dest: "{{ nginx_path }}/core:/stable:/v{{ KUBERENETES_VERSION }}/rpm" }
+  

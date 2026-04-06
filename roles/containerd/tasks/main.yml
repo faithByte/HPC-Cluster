@@ -117,10 +117,20 @@
     - "/tmp/crictl-{{ CRICTL_VERSION }}-linux-{{ architecture }}.tar.gz"
 
 - name: Set containerd commands in env PATH
-  ansible.builtin.include_tasks: add_to_path.yml
-  loop:
-    - /usr/local/bin
-    - /usr/local/sbin
+  ansible.builtin.blockinfile:
+    path: /etc/profile.d/bash_completion.sh
+    block: |
+      DIRS="/usr/local/bin:/usr/local/sbin"
+
+      for DIR in ${DIRS//:/ }; do
+        case ":$PATH:" in
+          *":$DIR:"*) ;;
+          *) PATH="$DIR:$PATH" ;;
+        esac
+      done
+
+      export PATH
+
 
 # sudo ctr image pull docker.io/library/busybox:latest
 # sudo ctr run --rm -t docker.io/library/busybox:latest test-runc echo "runc works"

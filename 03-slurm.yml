@@ -1,0 +1,14 @@
+- name:
+  hosts: cluster
+  roles:
+    - slurm
+
+- name:
+  hosts: masters
+  roles:
+    - slurmctld
+
+- name: 
+  hosts: nodes
+  roles:
+    - slurmd
