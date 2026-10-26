@@ -32,7 +32,7 @@ AuthType=auth/munge
 #MaxJobCount=10000
 #MaxStepCount=40000
 #MaxTasksPerNode=512
-MpiDefault=none
+MpiDefault=pmix_v4
 #MpiParams=ports=#-#
 #PluginDir=
 #PlugStackConfig=
@@ -60,7 +60,7 @@ SrunPortRange={{ SRUN_PORTS }}
 StateSaveLocation=/var/spool/slurmctld
 SwitchType=switch/none
 #TaskEpilog=
-TaskPlugin=task/cgroup
+TaskPlugin=task/affinity,task/cgroup
 
 #TaskProlog=
 #TopologyPlugin=topology/tree

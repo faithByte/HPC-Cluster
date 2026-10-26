@@ -24,12 +24,18 @@
   run_once: true
   delegate_to: "{{ groups['masters'][0] }}"
 
-- name: Broadcast Kubernetes GPG key
-  ansible.posix.synchronize:
+- name: fetch Kubernetes GPG key
+  ansible.builtin.fetch:
     src: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-    dest: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-    mode: push
+    dest: /tmp/kubernetes-apt-keyring.gpg
+    flat: yes
   delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Broadcast Kubernetes GPG key to all other nodes
+  ansible.builtin.copy:
+    src: /tmp/kubernetes-apt-keyring.gpg
+    dest: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
 - name: Add Kubernetes repo
   ansible.builtin.apt_repository:

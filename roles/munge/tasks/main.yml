@@ -41,12 +41,18 @@
   run_once: true
   delegate_to: "{{ groups['masters'][0] }}"
 
-- name: Broadcast munge archive
-  ansible.posix.synchronize:
+- name: fetch munge archive
+  ansible.builtin.fetch:
     src: /tmp/munge-{{ munge_version }}.tar.xz
     dest: /tmp/munge-{{ munge_version }}.tar.xz
-    mode: push
+    flat: yes
   delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Broadcast munge archive to all other nodes
+  ansible.builtin.copy:
+    src: /tmp/munge-{{ munge_version }}.tar.xz
+    dest: /tmp/munge-{{ munge_version }}.tar.xz
 
 - name: Install munge
   ansible.builtin.include_tasks: "{{ ansible_os_family }}.yml"
@@ -70,13 +76,19 @@
     cmd: /usr/sbin/mungekey -f
   run_once: true
   delegate_to: "{{ groups['masters'][0] }}"
-  
-- name: Broadcast munge key
-  ansible.posix.synchronize:
+
+- name: fetch munge key
+  ansible.builtin.fetch:
     src: /etc/munge/munge.key
-    dest: /etc/munge/munge.key
-    mode: push
+    dest: /tmp/munge.key 
+    flat: yes
   delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Broadcast munge key to all other nodes
+  ansible.builtin.copy:
+    src: /tmp/munge.key
+    dest: /etc/munge/munge.key
 
 - name: Change ownership of munge key
   ansible.builtin.file:

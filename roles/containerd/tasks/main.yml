@@ -14,15 +14,15 @@
     url: "https://github.com/opencontainers/runc/releases/download/v{{ RUNC_VERSION }}/runc.{{ architecture }}"
     dest: "/tmp/runc.{{ architecture }}"
     force: true
-  run_once: true
-  delegate_to: "{{ groups['masters'][0] }}"
+#   run_once: true
+#   delegate_to: "{{ groups['masters'][0] }}"
 
-- name: Broadcast runc
-  ansible.posix.synchronize:
-    src: "/tmp/runc.{{ architecture }}"
-    dest: "/tmp/runc.{{ architecture }}"
-    mode: push
-  delegate_to: "{{ groups['masters'][0] }}"
+# - name: Broadcast runc
+#   ansible.posix.synchronize:
+#     src: "/tmp/runc.{{ architecture }}"
+#     dest: "/tmp/runc.{{ architecture }}"
+#     mode: push
+#   delegate_to: "{{ groups['masters'][0] }}"
 
 - name: Install runc
   ansible.builtin.shell: |
@@ -35,15 +35,15 @@
     url: "https://github.com/kubernetes-sigs/cri-tools/releases/download/v{{ CRICTL_VERSION }}/crictl-v{{ CRICTL_VERSION }}-linux-{{ architecture }}.tar.gz"
     dest: "/tmp/crictl-{{ CRICTL_VERSION }}-linux-{{ architecture }}.tar.gz"
     force: true
-  run_once: true
-  delegate_to: "{{ groups['masters'][0] }}"
+#   run_once: true
+#   delegate_to: "{{ groups['masters'][0] }}"
 
-- name: Broadcast containerd archive
-  ansible.posix.synchronize:
-    src: /tmp/crictl-{{ CRICTL_VERSION }}-linux-{{ architecture }}.tar.gz
-    dest: /tmp/crictl-{{ CRICTL_VERSION }}-linux-{{ architecture }}.tar.gz
-    mode: push
-  delegate_to: "{{ groups['masters'][0] }}"
+# - name: Broadcast containerd archive
+#   ansible.posix.synchronize:
+#     src: /tmp/crictl-{{ CRICTL_VERSION }}-linux-{{ architecture }}.tar.gz
+#     dest: /tmp/crictl-{{ CRICTL_VERSION }}-linux-{{ architecture }}.tar.gz
+#     mode: push
+#   delegate_to: "{{ groups['masters'][0] }}"
 
 - name: Unarchive containerd archive
   ansible.builtin.unarchive:
@@ -64,15 +64,15 @@
     url: "https://github.com/containerd/containerd/releases/download/v{{ CONTAINERD_VERSION }}/containerd-{{ CONTAINERD_VERSION }}-linux-{{ architecture }}.tar.gz"
     dest: "/tmp/containerd-{{ CONTAINERD_VERSION }}-linux-{{ architecture }}.tar.gz"
     force: true
-  run_once: true
-  delegate_to: "{{ groups['masters'][0] }}"
+#   run_once: true
+#   delegate_to: "{{ groups['masters'][0] }}"
 
-- name: Broadcast containerd archive
-  ansible.posix.synchronize:
-    src: /tmp/containerd-{{ CONTAINERD_VERSION }}-linux-{{ architecture }}.tar.gz
-    dest: /tmp/containerd-{{ CONTAINERD_VERSION }}-linux-{{ architecture }}.tar.gz
-    mode: push
-  delegate_to: "{{ groups['masters'][0] }}"
+# - name: Broadcast containerd archive
+#   ansible.posix.synchronize:
+#     src: /tmp/containerd-{{ CONTAINERD_VERSION }}-linux-{{ architecture }}.tar.gz
+#     dest: /tmp/containerd-{{ CONTAINERD_VERSION }}-linux-{{ architecture }}.tar.gz
+#     mode: push
+#   delegate_to: "{{ groups['masters'][0] }}"
 
 - name: Unarchive containerd archive
   ansible.builtin.unarchive:
@@ -116,20 +116,20 @@
     - "/tmp/runc.{{ architecture }}"
     - "/tmp/crictl-{{ CRICTL_VERSION }}-linux-{{ architecture }}.tar.gz"
 
-- name: Set containerd commands in env PATH
-  ansible.builtin.blockinfile:
-    path: /etc/profile.d/bash_completion.sh
-    block: |
-      DIRS="/usr/local/bin:/usr/local/sbin"
+# - name: Set containerd commands in env PATH
+#   ansible.builtin.blockinfile:
+#     path: /etc/profile.d/bash_completion.sh
+#     block: |
+#       DIRS="/usr/local/bin:/usr/local/sbin"
 
-      for DIR in ${DIRS//:/ }; do
-        case ":$PATH:" in
-          *":$DIR:"*) ;;
-          *) PATH="$DIR:$PATH" ;;
-        esac
-      done
+#       for DIR in ${DIRS//:/ }; do
+#         case ":$PATH:" in
+#           *":$DIR:"*) ;;
+#           *) PATH="$DIR:$PATH" ;;
+#         esac
+#       done
 
-      export PATH
+#       export PATH
 
 
 # sudo ctr image pull docker.io/library/busybox:latest

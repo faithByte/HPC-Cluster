@@ -1,22 +1,41 @@
 ---
-- name: Init cluster
-  ansible.builtin.shell:
-    # cmd: kubeadm init --pod-network-cidr=10.244.0.0/16 --control-plane-endpoint={{ ansible_hostname }}.{{ DOMAIN_NAME }}:6443
-    cmd: kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address={{ ansible_host }}
-  notify: Control plane Firewall Setup
+# - name: Init cluster
+#   ansible.builtin.shell:
+#     # cmd: kubeadm init --pod-network-cidr=10.244.0.0/16 --control-plane-endpoint={{ ansible_hostname }}.{{ DOMAIN_NAME }}:6443 --ignore-preflight-errors=SystemVerification,ContainerRuntimeVersion # v1 on chartreuse
+#     cmd: kubeadm init --pod-network-cidr="{{ pod_cidr }}" --apiserver-advertise-address={{ ansible_host }}
+#   notify: Control plane Firewall Setup
 
-- name: Create kube folder
-  ansible.builtin.file:
-    path: "{{ lookup('env','HOME') }}/.kube"
-    state: directory
+# - name: Create kube folder
+#   ansible.builtin.file:
+#     path: "{{ lookup('env','HOME') }}/.kube"
+#     state: directory
 
-- name: Create kube config
-  ansible.builtin.copy:
-    src: /etc/kubernetes/admin.conf
-    dest: "{{ lookup('env','HOME') }}/.kube/config"
-    owner: "{{ ansible_user_id }}"
-    group: "{{ ansible_user_gid }}"
+# - name: Create kube config
+#   ansible.builtin.copy:
+#     src: /etc/kubernetes/admin.conf
+#     dest: "{{ lookup('env','HOME') }}/.kube/config"
+#     owner: "{{ ansible_user_id }}"
+#     group: "{{ ansible_user_gid }}"
 
-- name: Install network addon
-  ansible.builtin.shell:
-    cmd: kubectl apply -f https://reweave.azurewebsites.net/k8s/v1.29/net.yaml
+# # - name: Install network addon
+# #   ansible.builtin.shell:
+# #     cmd: kubectl apply -f https://reweave.azurewebsites.net/k8s/v1.29/net.yaml
+
+# - name: Add Docker GPG key
+#   ansible.builtin.get_url:
+#     url: "https://raw.githubusercontent.com/projectcalico/calico/master/manifests/calico.yaml"
+#     dest: "/tmp"
+#     force: true
+
+- name: Configure Calico Pod CIDR
+  ansible.builtin.replace:
+    path: /tmp/calico.yaml
+    regexp: '^(\s*)# - name: CALICO_IPV4POOL_CIDR\s*\n\s*#\s+value:.*$'
+    replace: '\1- name: CALICO_IPV4POOL_CIDR\n\1  value: "{{ pod_cidr }}"'
+
+# kubectl -n kube-system get cm kubeadm-config -o yaml | grep -i podSubnet | awk '{print $2}'
+
+- name:  
+  ansible.builtin.shell: |
+    kubectl apply -f /tmp/calico.yaml
+  ignore_errors: yes

@@ -1,0 +1,67 @@
+
+- name: Download Kubernetes
+  hosts: all
+  roles:
+    - etc-hosts # remove this after dns setup
+
+- name:
+  hosts: all,!nfs
+  tasks:
+    - name: Install Benchmark [apptainer]
+      ansible.builtin.shell: |
+        apt update -y
+        apt install openmpi-bin libopenmpi-dev wget -y
+        cd /tmp
+        wget https://github.com/apptainer/apptainer/releases/download/v1.5.2/apptainer_1.5.2_amd64.deb
+        apt install -y ./apptainer_1.5.2_amd64.deb
+
+    # - name: Upgrade
+    #   ansible.builtin.package:
+    #     name: "*"
+    #     state: latest
+
+    - name: Install tools
+      ansible.builtin.package:
+        name:
+          - python3-apt
+        state: latest
+
+# TO REMOVE
+- name: 
+  hosts: all,!nfs
+  tasks:
+    - name: Install tools for dev
+      ansible.builtin.package:
+        name:
+          - vim
+          - curl
+          - zsh
+          - git
+          - make
+        state: latest
+      
+    - name: oh my zsh
+      ansible.builtin.shell: |
+        echo y | sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+        chsh -s $(which zsh)
+      ignore_errors: yes
+
+# Benchmark
+# - name: 
+#   hosts: all,!nfs
+#   tasks:
+#     - name: Install tools for dev
+#       ansible.builtin.package:
+#         name:
+#           - openmpi-bin
+#           - libopenmpi-dev
+
+#     - name: Install Benchmark
+#       ansible.builtin.shell: |
+#         cd /mnt/data
+#         wget https://mvapich.cse.ohio-state.edu/download/mvapich/osu-micro-benchmarks-7.3.tar.gz
+#         tar -xvf osu-micro-benchmarks-7.3.tar.gz
+#         cd osu-micro-benchmarks-7.3
+#         ./configure CC=mpicc CXX=mpicxx
+#         make
+#         rm -f ../osu-micro-benchmarks-7.3.tar.gz

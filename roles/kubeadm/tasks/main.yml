@@ -49,7 +49,7 @@
     - net.bridge.bridge-nf-call-ip6tables
 ###
 
-- name: Load OS-specific tasks
+- name: Load OS-specific tasks adm
   ansible.builtin.include_tasks: "{{ ansible_os_family }}.yml"
 
 - name: Enable & Start kubelet

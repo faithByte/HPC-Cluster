@@ -1,4 +1,6 @@
 packages:
+  - gcc
+  - make
   - libssl-dev
   - libbz2-dev
   - zlib1g-dev

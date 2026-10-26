@@ -1,5 +1,6 @@
 ---
 
 shared_folders:
-  - /mnt/shared
+  - /mnt/data
   - /mnt/softs
+  - /mnt/benchmarks

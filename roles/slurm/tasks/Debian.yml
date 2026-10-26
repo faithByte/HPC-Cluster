@@ -9,9 +9,20 @@
     cd /tmp/slurm-{{ SLURM_VERSION }}
     echo y | mk-build-deps -i debian/control
     debuild -b -uc -us
-    ./configure --prefix={{ SLURM_CONF_PATH }}
+    ./configure \
+      --prefix=/etc/slurm \
+      --sysconfdir=/etc/slurm \
+      --with-munge \
+      --with-hwloc \
+      --with-json \
+      --with-pmix
+    make -j$(nproc)
     make install
     ldconfig -n /usr/lib64
+
+
+# ./configure --prefix={{ SLURM_CONF_PATH }} 
+# make install
 
 - name: Set slurm commands in env PATH
   ansible.builtin.lineinfile:
@@ -32,4 +43,3 @@
   ansible.builtin.file:
     path: /tmp/slurm-{{ SLURM_VERSION }}
     state: absent
-

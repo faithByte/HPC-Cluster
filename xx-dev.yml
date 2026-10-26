@@ -1,0 +1,9 @@
+- name: Download GO
+  hosts: cluster
+  roles:
+    - golang
+
+- name: Download kubebuilder
+  hosts: master
+  roles:
+    - kubebuilder

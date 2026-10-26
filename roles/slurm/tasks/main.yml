@@ -36,12 +36,18 @@
   run_once: true
   delegate_to: "{{ groups['masters'][0] }}"
 
-- name: Broadcast munge archive
-  ansible.posix.synchronize:
+- name: fetch slurm archive
+  ansible.builtin.fetch:
     src: /tmp/slurm-{{ SLURM_VERSION }}.tar.bz2
     dest: /tmp/slurm-{{ SLURM_VERSION }}.tar.bz2
-    mode: push
+    flat: yes
   delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+
+- name: Broadcast slurm archive to all other nodes
+  ansible.builtin.copy:
+    src: /tmp/slurm-{{ SLURM_VERSION }}.tar.bz2
+    dest: /tmp/slurm-{{ SLURM_VERSION }}.tar.bz2
 
 - name: Create slurm directory
   ansible.builtin.file:

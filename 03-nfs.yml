@@ -1,9 +1,9 @@
 - name: 
-  hosts: nfs
+  hosts: masters
   roles:
     - nfs-server
 
 - name:
-  hosts: cluster
+  hosts: nodes
   roles:
     - nfs-client

@@ -1,0 +1,29 @@
+---
+
+- name: GOOS
+  ansible.builtin.command:
+    cmd: /usr/local/go/bin/go env GOOS
+  register: GOOS
+
+- name: GOARCH
+  ansible.builtin.command: 
+    cmd: /usr/local/go/bin/go env GOARCH
+  register: GOARCH
+
+- name: Download kubebuilder 
+  ansible.builtin.get_url:
+    url: "https://go.kubebuilder.io/dl/latest/{{ GOOS.stdout }}/{{ GOARCH.stdout }}"
+    dest: "/usr/local/bin/kubebuilder"
+    mode: 0755
+    force: true
+  retries: 5
+  delay: 3
+  register: job
+  until: job.failed == false
+  
+- name: Create commands symbolic link
+  ansible.builtin.file:
+    src: "/usr/bin/kubectl"
+    dest: "/usr/local/bin/k"
+    mode: 0755
+    state: link

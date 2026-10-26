@@ -1,0 +1,10 @@
+
+- name: 
+  hosts: masters
+  vars:
+    PROC: 16
+    NODES: "{{ groups['nodes'] | length }}"
+    SLOTS:  "{{ (PROC / NODES) | round(0, 'ceil') | int }}"
+  roles:
+    - benchmarks
+

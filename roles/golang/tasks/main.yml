@@ -1,0 +1,22 @@
+---
+
+- name: Download GO 
+  ansible.builtin.get_url:
+    url: "https://go.dev/dl/go{{ version }}.linux-amd64.tar.gz"
+    dest: "/tmp/go{{ version }}.linux-amd64.tar.gz"
+    force: true
+  retries: 5
+  delay: 3
+  register: job
+  until: job.failed == false
+
+- name: Install GO
+  ansible.builtin.shell:
+    cmd: tar -C /usr/local -xzf /tmp/go{{ version }}.linux-amd64.tar.gz
+
+- name: Create commands symbolic link
+  ansible.builtin.file:
+    src: "/usr/local/go/bin/go"
+    dest: "/usr/local/bin/go"
+    mode: 0755
+    state: link

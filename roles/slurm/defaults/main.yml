@@ -1,2 +1,2 @@
-ansible_os_family: RedHat
+ansible_os_family: Debian
 availableID: 1000
